@@ -55,3 +55,23 @@ def test_student_profile_shows_dunning_kruger_correction() -> None:
 
 def test_unknown_student_404() -> None:
     assert client.get("/students/NOPE").status_code == 404
+
+
+def test_admin_integrity_intact() -> None:
+    body = client.get("/admin/integrity").json()
+    assert body == {"verified": True, "broken_at": None, "entries": 6}
+
+
+def test_admin_audit_is_hash_chained() -> None:
+    rows = client.get("/admin/audit").json()
+    assert len(rows) == 6
+    assert all(r["row_hash"] for r in rows)
+    actions = {r["action"] for r in rows}
+    assert {"login", "lecturer_approved", "recommendation_overridden"} <= actions
+
+
+def test_admin_approvals_and_overrides() -> None:
+    assert len(client.get("/admin/approvals").json()) == 2
+    overrides = client.get("/admin/overrides").json()
+    assert len(overrides) == 1
+    assert overrides[0]["reason"]  # override-watch: a reason is always recorded

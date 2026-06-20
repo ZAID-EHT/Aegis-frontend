@@ -1,0 +1,124 @@
+{
+  "_meta": {
+    "note": "Synthetic governance demo data. In production these rows are written by the SQL triggers in 0002_governance.sql and read under admin RLS. Timestamps are fixed (the engine never reads the clock)."
+  },
+  "audit": [
+    {
+      "id": 1,
+      "actor_id": "admin-1",
+      "actor_role": "admin",
+      "action": "login",
+      "target_type": null,
+      "target_id": null,
+      "reason": null,
+      "metadata": {},
+      "created_at": "2026-06-18T09:00:00Z",
+      "prev_hash": "GENESIS",
+      "row_hash": "298ac943fbcb15e64a033223dbd9def79324c68a88a6cfe21c8af37fff4813fc"
+    },
+    {
+      "id": 2,
+      "actor_id": "admin-1",
+      "actor_role": "admin",
+      "action": "lecturer_approved",
+      "target_type": "user",
+      "target_id": "lec-perera",
+      "reason": null,
+      "metadata": {
+        "grant_type": "lecturer_role"
+      },
+      "created_at": "2026-06-18T09:05:00Z",
+      "prev_hash": "298ac943fbcb15e64a033223dbd9def79324c68a88a6cfe21c8af37fff4813fc",
+      "row_hash": "1b3a80b6577449890cbdf15ee87cc0e6e48b32479e3609eb902d74703e1e17de"
+    },
+    {
+      "id": 3,
+      "actor_id": "admin-1",
+      "actor_role": "admin",
+      "action": "cohort_assigned",
+      "target_type": "user",
+      "target_id": "lec-perera",
+      "reason": null,
+      "metadata": {
+        "cohort": "CS-2026"
+      },
+      "created_at": "2026-06-18T09:06:00Z",
+      "prev_hash": "1b3a80b6577449890cbdf15ee87cc0e6e48b32479e3609eb902d74703e1e17de",
+      "row_hash": "4e36712f1b00406e583c38850f6572b48d74ae5672f5527068c29ce5ba20d2ea"
+    },
+    {
+      "id": 4,
+      "actor_id": "lec-perera",
+      "actor_role": "lecturer",
+      "action": "allocation_run",
+      "target_type": "cohort",
+      "target_id": "CS-2026",
+      "reason": null,
+      "metadata": {
+        "teams_formed": 3,
+        "exceptions": 0
+      },
+      "created_at": "2026-06-19T14:30:00Z",
+      "prev_hash": "4e36712f1b00406e583c38850f6572b48d74ae5672f5527068c29ce5ba20d2ea",
+      "row_hash": "d7780d4217a5b398b88b0d3788ea58fd99fdc6cb0cf4b8ff7ebbe9888404ba1b"
+    },
+    {
+      "id": 5,
+      "actor_id": "lec-perera",
+      "actor_role": "lecturer",
+      "action": "recommendation_overridden",
+      "target_type": "team",
+      "target_id": "T::P_05",
+      "reason": "Moved STU_08 in after meeting the team",
+      "metadata": {
+        "from": "formed",
+        "to": "overridden"
+      },
+      "created_at": "2026-06-19T15:10:00Z",
+      "prev_hash": "d7780d4217a5b398b88b0d3788ea58fd99fdc6cb0cf4b8ff7ebbe9888404ba1b",
+      "row_hash": "537a5586ec00fd15413367dbd30220867f83252d47be634f17eef4c39462bc9b"
+    },
+    {
+      "id": 6,
+      "actor_id": "lec-perera",
+      "actor_role": "lecturer",
+      "action": "alert_acknowledged",
+      "target_type": "team",
+      "target_id": "T::P_05",
+      "reason": null,
+      "metadata": {
+        "trigger": "ghosting_tier3",
+        "student": "STU_07"
+      },
+      "created_at": "2026-06-20T08:20:00Z",
+      "prev_hash": "537a5586ec00fd15413367dbd30220867f83252d47be634f17eef4c39462bc9b",
+      "row_hash": "482e6cfe63f6a7d8ba9ddb0977b3dc3c75d8baa879cf4ca1d2263ecd2233c183"
+    }
+  ],
+  "approvals": [
+    {
+      "request_id": "req-01",
+      "full_name": "Dr. Silva",
+      "email": "silva@aegis.test",
+      "role_requested": "lecturer",
+      "requested_at": "2026-06-20T10:00:00Z"
+    },
+    {
+      "request_id": "req-02",
+      "full_name": "Dr. Fernando",
+      "email": "fernando@aegis.test",
+      "role_requested": "lecturer",
+      "requested_at": "2026-06-20T11:30:00Z"
+    }
+  ],
+  "overrides": [
+    {
+      "team_id": "T::P_05",
+      "lecturer": "Dr. Perera",
+      "from_status": "formed",
+      "to_status": "overridden",
+      "reason": "Moved STU_08 in after meeting the team",
+      "at": "2026-06-19T15:10:00Z"
+    }
+  ]
+}

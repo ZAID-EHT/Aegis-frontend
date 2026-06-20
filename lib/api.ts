@@ -66,7 +66,57 @@ export interface RunResponse {
   student_profiles: StudentProfile[];
 }
 
+export interface AuditView {
+  id: number;
+  actor_id: string;
+  actor_role: string;
+  action: string;
+  target_id: string | null;
+  reason: string | null;
+  created_at: string;
+  row_hash: string | null;
+}
+
+export interface ApprovalView {
+  request_id: string;
+  full_name: string;
+  email: string;
+  role_requested: string;
+  requested_at: string;
+}
+
+export interface OverrideView {
+  team_id: string;
+  lecturer: string;
+  from_status: string;
+  to_status: string;
+  reason: string;
+  at: string;
+}
+
+export interface IntegrityView {
+  verified: boolean;
+  broken_at: number | null;
+  entries: number;
+}
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+async function getJSON<T>(path: string): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`);
+  } catch {
+    throw new Error(`Could not reach the AEGIS API at ${API_URL}. Is it running (uvicorn)?`);
+  }
+  if (!res.ok) throw new Error(`${path} failed (${res.status}).`);
+  return res.json() as Promise<T>;
+}
+
+export const getAudit = () => getJSON<AuditView[]>("/admin/audit");
+export const getApprovals = () => getJSON<ApprovalView[]>("/admin/approvals");
+export const getOverrides = () => getJSON<OverrideView[]>("/admin/overrides");
+export const getIntegrity = () => getJSON<IntegrityView>("/admin/integrity");
 
 function isRunResponse(v: unknown): v is RunResponse {
   if (typeof v !== "object" || v === null) return false;

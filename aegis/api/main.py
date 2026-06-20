@@ -19,11 +19,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from aegis.adapters.repo_governance import load_governance
 from aegis.adapters.repo_seed import load_cohort
 from aegis.domain.models import AllocationResult, Cohort
 from aegis.engine import config
 from aegis.engine.phase_a_scoring import fit
 from aegis.engine.pipeline import run
+from aegis.governance.audit import verify
+from aegis.governance.models import GovernanceData
 
 app = FastAPI(title="AEGIS", version="1.0.0", description="Capstone allocation engine API")
 app.add_middleware(
@@ -45,6 +48,12 @@ def _result() -> AllocationResult:
     # Seed is static, so one run serves every request. INVARIANT: callers must treat
     # the returned object as read-only — all serialisers below only read it.
     return run(_cohort())
+
+
+@lru_cache(maxsize=1)
+def _governance() -> GovernanceData:
+    # Static seed; one load serves every request. Read-only invariant as in _result().
+    return load_governance()
 
 
 # ── response models ──────────────────────────────────────────────────────────
@@ -271,3 +280,97 @@ def get_student(student_id: str) -> StudentProfile:
     if not any(s.student_id == student_id for s in cohort.students):
         raise HTTPException(status_code=404, detail=f"unknown student {student_id}")
     return _profile(cohort, _result(), student_id)
+
+
+# ── admin console (governance) ───────────────────────────────────────────────
+class AuditView(BaseModel):
+    id: int
+    actor_id: str
+    actor_role: str
+    action: str
+    target_id: str | None
+    reason: str | None
+    created_at: str
+    row_hash: str | None
+
+
+class ApprovalView(BaseModel):
+    request_id: str
+    full_name: str
+    email: str
+    role_requested: str
+    requested_at: str
+
+
+class OverrideView(BaseModel):
+    team_id: str
+    lecturer: str
+    from_status: str
+    to_status: str
+    reason: str
+    at: str
+
+
+class IntegrityView(BaseModel):
+    verified: bool
+    broken_at: int | None  # id of the first tampered audit row, or null if intact
+    entries: int
+
+
+@app.get("/admin/audit", response_model=list[AuditView])
+def get_audit() -> list[AuditView]:
+    return [
+        AuditView(
+            id=e.id,
+            actor_id=e.actor_id,
+            actor_role=e.actor_role,
+            action=e.action,
+            target_id=e.target_id,
+            reason=e.reason,
+            created_at=e.created_at,
+            row_hash=e.row_hash,
+        )
+        for e in _governance().audit
+    ]
+
+
+@app.get("/admin/approvals", response_model=list[ApprovalView])
+def get_approvals() -> list[ApprovalView]:
+    return [
+        ApprovalView(
+            request_id=a.request_id,
+            full_name=a.full_name,
+            email=a.email,
+            role_requested=a.role_requested,
+            requested_at=a.requested_at,
+        )
+        for a in _governance().approvals
+    ]
+
+
+@app.get("/admin/overrides", response_model=list[OverrideView])
+def get_overrides() -> list[OverrideView]:
+    return [
+        OverrideView(
+            team_id=o.team_id,
+            lecturer=o.lecturer,
+            from_status=o.from_status,
+            to_status=o.to_status,
+            reason=o.reason,
+            at=o.at,
+        )
+        for o in _governance().overrides
+    ]
+
+
+@app.get("/admin/integrity", response_model=IntegrityView)
+def get_integrity() -> IntegrityView:
+    """Mirror of SQL audit_verify(): recompute the hash chain, report any break.
+
+    An empty log is NOT "verified" — a truncated/zeroed audit trail must never show
+    a green badge over nothing.
+    """
+    audit = _governance().audit
+    broken = verify(audit)
+    verified = broken is None and len(audit) > 0
+    return IntegrityView(verified=verified, broken_at=broken, entries=len(audit))

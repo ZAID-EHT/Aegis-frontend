@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, Copy, Play, ShieldAlert, UserX, Loader2 } from "lucide-react";
 
@@ -167,6 +168,7 @@ function ConflictPanel({ data }: { data: RunResponse }) {
 }
 
 export default function Page() {
+  const router = useRouter();
   const [status, setStatus] = React.useState<Status>("idle");
   const [stage, setStage] = React.useState(1);
   const [data, setData] = React.useState<RunResponse | null>(null);
@@ -194,7 +196,11 @@ export default function Page() {
   const spotlight = data?.student_profiles.find((p) => p.skills.some((s) => s.corrected));
 
   return (
-    <AppShell active="overview" rail={data ? <AlertInbox alerts={data.alerts} /> : undefined}>
+    <AppShell
+      active="overview"
+      onNavigate={(key) => router.push(key === "settings" ? "/admin" : "/")}
+      rail={data ? <AlertInbox alerts={data.alerts} /> : undefined}
+    >
       <div className="flex flex-col gap-6">
         {/* header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
