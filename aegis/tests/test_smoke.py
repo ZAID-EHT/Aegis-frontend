@@ -74,6 +74,38 @@ def test_confidence_vocab_in_sync() -> None:
     assert set(CONFIDENCE_BASES) == set(config.CONFIDENCE)
 
 
+def test_role_vocab_in_sync() -> None:
+    """domain.ROLES and engine.config.ROLE_DISCIPLINE keys must stay 1:1, else a role
+    silently scores RoleMatch 0.3 (a wrong-but-plausible Fit)."""
+    from aegis.domain.models import ROLES
+
+    assert set(ROLES) == set(config.ROLE_DISCIPLINE)
+
+
+def test_loader_rejects_unknown_role(tmp_path: Path) -> None:
+    """A typo'd preferred_role must fail loudly at load, not silently degrade Fit."""
+    bad = {
+        "students": [
+            {
+                "student_id": "STU_X",
+                "name": "Role Typo",
+                "email": "x@aegis.test",
+                "capacity_hours": 8.0,
+                "preferred_role": "tech-lead",  # hyphen, not in ROLES
+                "skills": [
+                    {"discipline": "technical", "declared_level": 4, "confidence_basis": "verified"}
+                ],
+            }
+        ],
+        "projects": [],
+        "activity_log": [],
+    }
+    path = tmp_path / "bad_role.json"
+    path.write_text(json.dumps(bad), encoding="utf-8")
+    with pytest.raises(ValueError, match="unknown preferred_role 'tech-lead'"):
+        load_cohort(path)
+
+
 def test_loader_rejects_unknown_vocab(tmp_path: Path) -> None:
     """A typo'd discipline/basis must fail loudly at load, not silently score 0."""
     bad = {

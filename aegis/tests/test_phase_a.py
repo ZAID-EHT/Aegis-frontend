@@ -27,8 +27,10 @@ def test_dunning_kruger_correction(cohort: Cohort) -> None:
 
 
 def test_verified_not_punished(cohort: Cohort) -> None:
-    """A verified 5 is trusted at full weight -> 5 × 1.0 = 5.0."""
+    """A verified claim is trusted at full weight: 5 × 1.0 = 5.0 and 4 × 1.0 = 4.0."""
     assert adjusted(_skill(_student(cohort, "STU_01"), "technical")) == pytest.approx(5.0)
+    # declared = 4, confidence = 1.0 (verified) -> adjusted 4.0 (spec golden case)
+    assert adjusted(_skill(_student(cohort, "STU_01"), "management")) == pytest.approx(4.0)
 
 
 def test_portfolio_and_selfreport_tiers(cohort: Cohort) -> None:

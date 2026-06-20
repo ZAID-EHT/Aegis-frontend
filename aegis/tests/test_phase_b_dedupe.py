@@ -29,6 +29,23 @@ def test_no_accidental_duplicates(cohort: Cohort) -> None:
     assert pairs == {frozenset(("P_02", "P_03"))}
 
 
+def test_threshold_is_pinned() -> None:
+    """Pin the gate value so a de-calibration (e.g. 0.88) can't pass silently within
+    the wide calibration band."""
+    assert config.DEDUPE_THRESHOLD == 0.75
+
+
+def test_contentless_abstracts_return_empty(cohort: Cohort) -> None:
+    """All-stopword abstracts collapse the TF-IDF vocabulary — the gate must return []
+    (a content-free pair is intentionally NOT flagged), not crash on empty vocabulary."""
+    from dataclasses import replace
+
+    a, b = cohort.projects[0], cohort.projects[1]
+    stop = "the a an of to and or in on"
+    blanked = (replace(a, abstract=stop), replace(b, abstract=stop))
+    assert duplicate_flags(blanked) == []
+
+
 def test_flags_sorted_desc(cohort: Cohort) -> None:
     flags = duplicate_flags(cohort.projects)
     sims = [f.similarity for f in flags]

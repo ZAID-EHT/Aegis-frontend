@@ -14,6 +14,7 @@ from typing import Any
 from aegis.domain.models import (
     CONFIDENCE_BASES,
     DISCIPLINES,
+    ROLES,
     ActivityEvent,
     Cohort,
     Project,
@@ -62,7 +63,9 @@ def _student(raw: dict[str, Any]) -> Student:
         preferred_projects=tuple(str(p) for p in raw.get("preferred_projects", [])),
         preferred_teammate_id=None if teammate is None else str(teammate),
         availability=tuple(str(a) for a in raw.get("availability", [])),
-        preferred_role=None if role is None else str(role),
+        preferred_role=(
+            None if role is None else _check(str(role), ROLES, "preferred_role", f"student {sid}")
+        ),
     )
 
 

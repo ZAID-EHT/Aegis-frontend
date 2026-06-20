@@ -25,6 +25,17 @@ CONFIDENCE_BASES: tuple[str, ...] = (
     "contradicted",
 )
 
+# Preferred-role vocabulary — maps 1:1 to engine.config.ROLE_DISCIPLINE keys.
+# A role outside this set would silently score RoleMatch 0.3, so it is validated at load.
+ROLES: tuple[str, ...] = (
+    "tech_lead",
+    "qa_lead",
+    "ux_lead",
+    "research_lead",
+    "doc_lead",
+    "management",
+)
+
 
 # ── Inputs (immutable) ──────────────────────────────────────────────────────
 @dataclass(frozen=True)
