@@ -43,6 +43,29 @@ export const RECOMMENDATION = {
   overload: "Workload needs balancing",
 };
 
+/** One-line explanation per summary metric, shown in its hover preview. */
+export const STAT_HINTS: Record<string, string> = {
+  "Teams formed": "Teams the engine formed from this cohort.",
+  "On track": "Teams with a healthy score and no warning signs.",
+  "Needs attention": "Teams that are at risk or need an urgent look.",
+  "To review": "Open items waiting in the attention inbox.",
+  Urgent: "Issues that need action now.",
+  Attention: "Worth a look soon — not yet urgent.",
+  Info: "For your awareness; no action needed.",
+  "Students considered": "Students included in this allocation run.",
+  "Duplicates flagged": "Project proposals that look too similar.",
+  "Held for review": "Students set aside for manual placement.",
+  "Alerts raised": "Total items needing your attention.",
+};
+
+/** Friendly labels for the four health-score components (shown in team previews). */
+export const HEALTH_COMPONENT: Record<string, string> = {
+  task_completion: "Tasks done",
+  workload_balance: "Workload balance",
+  engagement: "Engagement",
+  milestone: "Milestones",
+};
+
 /** Plain-language alert copy keyed by engine trigger. */
 const ALERT_COPY: Record<string, { title: string; description: string }> = {
   ghosting_tier3: {

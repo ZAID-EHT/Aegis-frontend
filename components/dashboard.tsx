@@ -16,9 +16,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import type { AlertView, RunResponse, StudentProfile, TeamView } from "@/lib/api";
 import { type makeLookups, titleCase, utilisationPct } from "@/lib/format";
-import { RECOMMENDATION, band, friendlyAlert } from "@/lib/labels";
+import {
+  HEALTH_COMPONENT,
+  RECOMMENDATION,
+  STAT_HINTS,
+  band,
+  friendlyAlert,
+} from "@/lib/labels";
 
 export type Lookups = ReturnType<typeof makeLookups>;
 
@@ -47,7 +54,7 @@ export function StatTile({
   label: string;
   value: React.ReactNode;
 }) {
-  return (
+  const card = (
     <Card className="flex items-center gap-4 p-5">
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Icon className="h-5 w-5" />
@@ -58,13 +65,99 @@ export function StatTile({
       </div>
     </Card>
   );
+  const hint = STAT_HINTS[label];
+  if (!hint) return card;
+  return (
+    <HoverCard openDelay={160} closeDelay={120}>
+      <HoverCardTrigger asChild>{card}</HoverCardTrigger>
+      <HoverCardContent className="w-64">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon className="h-5 w-5" />
+          </div>
+          <p className="text-3xl font-bold tabular-nums text-foreground">{value}</p>
+        </div>
+        <p className="mt-3 text-sm font-semibold text-foreground">{label}</p>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{hint}</p>
+      </HoverCardContent>
+    </HoverCard>
+  );
 }
 
-// ── team card ─────────────────────────────────────────────────────────────────
+// ── team card (hover for the full breakdown) ─────────────────────────────────
+function memberRight(m: TeamView["members"][number]) {
+  return m.overloaded ? (
+    <span className="shrink-0 text-xs font-medium" style={{ color: "var(--at-risk-ink)" }}>
+      Over capacity
+    </span>
+  ) : (
+    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+      {utilisationPct(m.utilisation)}
+    </span>
+  );
+}
+
+function TeamDetail({ team }: { team: TeamView }) {
+  const status = band(team.band);
+  const components = Object.entries(team.components ?? {});
+  const needsBalancing = team.unallocated_hours > 0 || team.members.some((m) => m.overloaded);
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <h4 className="text-sm font-semibold text-foreground">{team.project_title}</h4>
+          <StatusBadge tone={status.tone} dot>
+            {status.label}
+          </StatusBadge>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Team health {Math.round(team.health_score)} of 100.
+        </p>
+      </div>
+
+      {components.length > 0 && (
+        <div className="flex flex-col gap-2.5">
+          {components.map(([key, value]) => {
+            const pct = Math.min(100, Math.max(0, value * 100));
+            return (
+              <div key={key}>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{HEALTH_COMPONENT[key] ?? key}</span>
+                  <span className="tabular-nums text-foreground">{Math.round(pct)}%</span>
+                </div>
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1.5 border-t border-border/60 pt-3">
+        <p className="text-xs font-medium text-muted-foreground">Members</p>
+        {team.members.map((m) => (
+          <div key={m.student_id} className="flex items-center justify-between gap-3 text-sm">
+            <span className="truncate text-foreground">{m.name}</span>
+            {memberRight(m)}
+          </div>
+        ))}
+      </div>
+
+      {needsBalancing && (
+        <p className="text-xs" style={{ color: "var(--at-risk-ink)" }}>
+          {RECOMMENDATION.overload}
+          {team.unallocated_hours > 0 ? ` · ${Math.round(team.unallocated_hours)} h unassigned` : ""}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function TeamCard({ team }: { team: TeamView }) {
   const status = band(team.band);
   const needsBalancing = team.unallocated_hours > 0 || team.members.some((m) => m.overloaded);
-  return (
+  const summary = (
     <Card className="flex flex-col gap-5 p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -107,6 +200,14 @@ export function TeamCard({ team }: { team: TeamView }) {
         </p>
       )}
     </Card>
+  );
+  return (
+    <HoverCard openDelay={160} closeDelay={120}>
+      <HoverCardTrigger asChild>{summary}</HoverCardTrigger>
+      <HoverCardContent align="start" className="w-80">
+        <TeamDetail team={team} />
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 
@@ -188,19 +289,33 @@ export function ReviewPanel({ data, lookups }: { data: RunResponse; lookups: Loo
 export function AlertRow({ alert, lookups }: { alert: AlertView; lookups: Lookups }) {
   const a = friendlyAlert(alert, lookups);
   return (
-    <motion.div
-      variants={rise}
-      className="rounded-2xl border border-border/60 bg-card p-4 shadow-card"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-sm font-semibold text-foreground">{a.title}</span>
-        <StatusBadge tone={a.tone} dot>
-          {a.severity}
-        </StatusBadge>
-      </div>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>
-      {a.context && <p className="mt-1.5 text-xs font-medium text-foreground/70">{a.context}</p>}
-    </motion.div>
+    <HoverCard openDelay={160} closeDelay={120}>
+      <HoverCardTrigger asChild>
+        <motion.div
+          variants={rise}
+          className="rounded-2xl border border-border/60 bg-card p-4 shadow-card"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-sm font-semibold text-foreground">{a.title}</span>
+            <StatusBadge tone={a.tone} dot>
+              {a.severity}
+            </StatusBadge>
+          </div>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>
+          {a.context && <p className="mt-1.5 text-xs font-medium text-foreground/70">{a.context}</p>}
+        </motion.div>
+      </HoverCardTrigger>
+      <HoverCardContent align="start" className="w-72">
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-sm font-semibold text-foreground">{a.title}</span>
+          <StatusBadge tone={a.tone} dot>
+            {a.severity}
+          </StatusBadge>
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.description}</p>
+        {a.context && <p className="mt-2 text-sm font-medium text-foreground">{a.context}</p>}
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 
