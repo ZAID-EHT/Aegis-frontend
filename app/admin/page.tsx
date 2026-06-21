@@ -8,6 +8,7 @@ import { GitPullRequestArrow, ScrollText, ShieldCheck, ShieldX, UserCheck } from
 import { AppShell } from "@/components/aegis/app-shell";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
+import { routeFor } from "@/lib/nav";
 import {
   type ApprovalView,
   type AuditView,
@@ -121,7 +122,7 @@ export default function AdminPage() {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Failed to load"));
   }, []);
 
-  const navigate = (key: string) => router.push(key === "settings" ? "/admin" : "/");
+  const navigate = (key: string) => router.push(routeFor(key));
 
   return (
     <AppShell active="settings" onNavigate={navigate}>
