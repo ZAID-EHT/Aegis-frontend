@@ -19,13 +19,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { CardZoom } from "@/components/ui/card-zoom";
 import type { AlertView, RunResponse, StudentProfile, TeamView } from "@/lib/api";
 import { type makeLookups, titleCase, utilisationPct } from "@/lib/format";
-import {
-  HEALTH_COMPONENT,
-  RECOMMENDATION,
-  STAT_HINTS,
-  band,
-  friendlyAlert,
-} from "@/lib/labels";
+import { HEALTH_COMPONENT, RECOMMENDATION, band, friendlyAlert } from "@/lib/labels";
 
 export type Lookups = ReturnType<typeof makeLookups>;
 
@@ -54,7 +48,7 @@ export function StatTile({
   label: string;
   value: React.ReactNode;
 }) {
-  const card = (
+  return (
     <Card className="flex items-center gap-4 p-5">
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Icon className="h-5 w-5" />
@@ -64,26 +58,6 @@ export function StatTile({
         <p className="text-xs text-muted-foreground">{label}</p>
       </div>
     </Card>
-  );
-  const hint = STAT_HINTS[label];
-  if (!hint) return card;
-  return (
-    <CardZoom
-      preview={
-        <Card className="flex flex-col items-start gap-5 p-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
-            <Icon className="h-8 w-8" />
-          </div>
-          <p className="text-6xl font-bold tracking-tight tabular-nums text-foreground">{value}</p>
-          <div>
-            <p className="text-lg font-semibold text-foreground">{label}</p>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{hint}</p>
-          </div>
-        </Card>
-      }
-    >
-      {card}
-    </CardZoom>
   );
 }
 
@@ -292,34 +266,19 @@ export function ReviewPanel({ data, lookups }: { data: RunResponse; lookups: Loo
 export function AlertRow({ alert, lookups }: { alert: AlertView; lookups: Lookups }) {
   const a = friendlyAlert(alert, lookups);
   return (
-    <CardZoom
-      preview={
-        <Card className="flex flex-col gap-3 p-7">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-bold tracking-tight text-foreground">{a.title}</h3>
-            <StatusBadge tone={a.tone} dot>
-              {a.severity}
-            </StatusBadge>
-          </div>
-          <p className="text-sm leading-relaxed text-muted-foreground">{a.description}</p>
-          {a.context && <p className="text-sm font-medium text-foreground">{a.context}</p>}
-        </Card>
-      }
+    <motion.div
+      variants={rise}
+      className="rounded-2xl border border-border/60 bg-card p-4 shadow-card"
     >
-      <motion.div
-        variants={rise}
-        className="rounded-2xl border border-border/60 bg-card p-4 shadow-card"
-      >
-        <div className="flex items-start justify-between gap-2">
-          <span className="text-sm font-semibold text-foreground">{a.title}</span>
-          <StatusBadge tone={a.tone} dot>
-            {a.severity}
-          </StatusBadge>
-        </div>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>
-        {a.context && <p className="mt-1.5 text-xs font-medium text-foreground/70">{a.context}</p>}
-      </motion.div>
-    </CardZoom>
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-sm font-semibold text-foreground">{a.title}</span>
+        <StatusBadge tone={a.tone} dot>
+          {a.severity}
+        </StatusBadge>
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>
+      {a.context && <p className="mt-1.5 text-xs font-medium text-foreground/70">{a.context}</p>}
+    </motion.div>
   );
 }
 

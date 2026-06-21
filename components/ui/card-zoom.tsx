@@ -3,16 +3,17 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 /**
- * CardZoom — on pointer hover, shows an enlarged copy of the card centered on the
- * page (over a soft dimmed backdrop) with its full detail; it leaves when the
- * pointer does. The overlay is portalled to <body> and is pointer-events:none, so
- * the original card keeps the hover (no flicker) and clicks pass straight through.
- * Honours reduced motion via the app-wide MotionConfig (transforms collapse to a
- * crossfade).
+ * CardZoom — click a card to open an enlarged copy centered on the page (over a
+ * dimmed, blurred backdrop) with its full detail. Closes on backdrop click, the ×
+ * button, or Escape. The overlay is portalled to <body>; body scroll is locked
+ * while open. Motion is reduced-motion safe via the app-wide MotionConfig.
  */
 export function CardZoom({
   children,
@@ -27,12 +28,34 @@ export function CardZoom({
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
   return (
     <>
       <div
-        className={className}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
+        className={cn("cursor-pointer", className)}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
       >
         {children}
       </div>
@@ -43,21 +66,32 @@ export function CardZoom({
             {open && (
               <motion.div
                 className="fixed inset-0 z-50 grid place-items-center p-6"
-                style={{ pointerEvents: "none" }}
+                role="dialog"
+                aria-modal="true"
+                onClick={() => setOpen(false)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18, ease: EASE }}
               >
-                <div className="absolute inset-0 bg-foreground/25 backdrop-blur-[3px]" />
+                <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[3px]" />
                 <motion.div
                   className="relative w-full max-w-md"
+                  onClick={(e) => e.stopPropagation()}
                   initial={{ opacity: 0, scale: 0.9, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94, y: 8 }}
                   transition={{ duration: 0.26, ease: EASE }}
                 >
                   {preview}
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    onClick={() => setOpen(false)}
+                    className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </motion.div>
               </motion.div>
             )}
