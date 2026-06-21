@@ -5,8 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, Loader2, LogIn } from "lucide-react";
 
-import { AuthFrame, FIELD, LABEL, SUBMIT } from "@/components/auth/auth-frame";
+import { AuthFrame } from "@/components/auth/auth-frame";
 import { GoogleButton, OrDivider } from "@/components/auth/google-button";
+import { PasswordInput } from "@/components/auth/password-input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 function LoginForm() {
@@ -69,10 +73,8 @@ function LoginForm() {
         )}
 
         <div>
-          <label htmlFor="email" className={LABEL}>
-            Email
-          </label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             autoComplete="email"
@@ -80,32 +82,25 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@university.edu"
-            className={FIELD}
           />
         </div>
 
         <div>
-          <div className="mb-1.5 flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-medium text-foreground">
-              Password
-            </label>
-          </div>
-          <input
+          <Label htmlFor="password">Password</Label>
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className={FIELD}
           />
         </div>
 
-        <button type="submit" disabled={busy} className={SUBMIT}>
+        <Button type="submit" disabled={busy} className="w-full">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
           {busy ? "Signing in…" : "Sign in"}
-        </button>
+        </Button>
 
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           By continuing you agree to our{" "}

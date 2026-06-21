@@ -57,11 +57,6 @@ export function AuthFrame({
   );
 }
 
-/** Shared field + control styles so login and signup stay identical. */
+/** Shared field style for the role <select> (other fields use the Input component). */
 export const FIELD =
-  "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-shadow focus:ring-2 focus:ring-primary/40";
-
-export const LABEL = "mb-1.5 block text-sm font-medium text-foreground";
-
-export const SUBMIT =
-  "inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-card transition-all hover:shadow-card-lg disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-primary/40";

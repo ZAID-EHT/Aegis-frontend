@@ -5,8 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Loader2, MailCheck, UserPlus } from "lucide-react";
 
-import { AuthFrame, FIELD, LABEL, SUBMIT } from "@/components/auth/auth-frame";
+import { AuthFrame, FIELD } from "@/components/auth/auth-frame";
 import { GoogleButton, OrDivider } from "@/components/auth/google-button";
+import { PasswordInput } from "@/components/auth/password-input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -113,10 +117,8 @@ export default function SignupPage() {
         )}
 
         <div>
-          <label htmlFor="name" className={LABEL}>
-            Full name
-          </label>
-          <input
+          <Label htmlFor="name">Full name</Label>
+          <Input
             id="name"
             type="text"
             autoComplete="name"
@@ -124,15 +126,12 @@ export default function SignupPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nadeesha Perera"
-            className={FIELD}
           />
         </div>
 
         <div>
-          <label htmlFor="email" className={LABEL}>
-            Email
-          </label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             autoComplete="email"
@@ -140,30 +139,23 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@university.edu"
-            className={FIELD}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="password" className={LABEL}>
-              Password
-            </label>
-            <input
+            <Label htmlFor="password">Password</Label>
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="new-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="8+ characters"
-              className={FIELD}
             />
           </div>
           <div>
-            <label htmlFor="role" className={LABEL}>
-              I am a
-            </label>
+            <Label htmlFor="role">I am a</Label>
             <select
               id="role"
               value={role}
@@ -192,10 +184,10 @@ export default function SignupPage() {
           </span>
         </label>
 
-        <button type="submit" disabled={busy} className={SUBMIT}>
+        <Button type="submit" disabled={busy} className="w-full">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
           {busy ? "Creating account…" : "Create account"}
-        </button>
+        </Button>
         </form>
       </div>
     </AuthFrame>
