@@ -11,11 +11,12 @@
 
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { GitBranch, LayoutGrid, Menu, Settings, ShieldAlert, Users, X } from "lucide-react";
+import { GitBranch, LayoutGrid, LogOut, Menu, Settings, ShieldAlert, Users, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { Logo } from "@/components/aegis/logo";
 import { ThemeToggle } from "@/components/aegis/theme-toggle";
+import { useUser } from "@/lib/use-user";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -39,14 +40,30 @@ export interface AppShellProps {
   children: React.ReactNode;
 }
 
-function UserCard() {
+function UserCard({
+  name,
+  role,
+  onSignOut,
+}: {
+  name: string;
+  role: string;
+  onSignOut: () => void;
+}) {
   return (
     <div className="flex items-center gap-3 rounded-2xl bg-secondary/60 p-2.5">
-      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-chart-1 to-chart-5" />
-      <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-foreground">Dr. Perera</p>
-        <p className="truncate text-xs text-muted-foreground">Supervisor</p>
+      <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-chart-1 to-chart-5" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">{name}</p>
+        <p className="truncate text-xs capitalize text-muted-foreground">{role}</p>
       </div>
+      <button
+        onClick={onSignOut}
+        aria-label="Sign out"
+        title="Sign out"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+      >
+        <LogOut className="h-4 w-4" />
+      </button>
     </div>
   );
 }
@@ -54,6 +71,9 @@ function UserCard() {
 export function AppShell({ active = "overview", onNavigate, rail, children }: AppShellProps) {
   const reduce = useReducedMotion();
   const [drawer, setDrawer] = React.useState(false);
+  const { user, signOut } = useUser();
+  const displayName = user?.name ?? "Account";
+  const displayRole = user?.role ?? "Member";
 
   const NavButton = ({ item, layoutKey }: { item: NavItem; layoutKey: string }) => {
     const isActive = item.key === active;
@@ -97,7 +117,7 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
       </nav>
       <div className="mt-auto flex items-center gap-2">
         <div className="min-w-0 flex-1">
-          <UserCard />
+          <UserCard name={displayName} role={displayRole} onSignOut={signOut} />
         </div>
         <ThemeToggle />
       </div>
@@ -165,7 +185,7 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
                 ))}
               </nav>
               <div className="mt-auto">
-                <UserCard />
+                <UserCard name={displayName} role={displayRole} onSignOut={signOut} />
               </div>
             </motion.aside>
           </>

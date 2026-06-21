@@ -1,0 +1,67 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+
+import { Logo } from "@/components/aegis/logo";
+import { ThemeToggle } from "@/components/aegis/theme-toggle";
+
+/** Shared centered frame for the login / signup pages, on the brand wash. */
+export function AuthFrame({
+  title,
+  subtitle,
+  children,
+  footer,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-background">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(48rem 28rem at 50% -8%, color-mix(in oklch, var(--primary) 16%, transparent), transparent)",
+        }}
+      />
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+
+      <div className="mx-auto flex min-h-screen w-full max-w-[26rem] flex-col justify-center px-5 py-12">
+        <div className="mb-8 flex justify-center">
+          <Link href="/" aria-label="AEGIS home">
+            <Logo />
+          </Link>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-3xl border border-border/60 bg-card p-8 shadow-card-lg"
+        >
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+          {subtitle && <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{subtitle}</p>}
+          <div className="mt-6">{children}</div>
+        </motion.div>
+
+        {footer && <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div>}
+      </div>
+    </main>
+  );
+}
+
+/** Shared field + control styles so login and signup stay identical. */
+export const FIELD =
+  "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-shadow focus:ring-2 focus:ring-primary/40";
+
+export const LABEL = "mb-1.5 block text-sm font-medium text-foreground";
+
+export const SUBMIT =
+  "inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-card transition-all hover:shadow-card-lg disabled:cursor-not-allowed disabled:opacity-60";
