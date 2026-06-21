@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, Loader2, MailCheck, UserPlus } from "lucide-react";
 
 import { AuthFrame, FIELD, LABEL, SUBMIT } from "@/components/auth/auth-frame";
+import { GoogleButton, OrDivider } from "@/components/auth/google-button";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -92,7 +93,10 @@ export default function SignupPage() {
         </>
       }
     >
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
+        <GoogleButton label="Sign up with Google" />
+        <OrDivider />
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {error && (
           <div
             className="flex items-start gap-2 rounded-xl border p-3 text-sm"
@@ -192,7 +196,8 @@ export default function SignupPage() {
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
           {busy ? "Creating account…" : "Create account"}
         </button>
-      </form>
+        </form>
+      </div>
     </AuthFrame>
   );
 }

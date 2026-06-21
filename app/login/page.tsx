@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, Loader2, LogIn } from "lucide-react";
 
 import { AuthFrame, FIELD, LABEL, SUBMIT } from "@/components/auth/auth-frame";
+import { GoogleButton, OrDivider } from "@/components/auth/google-button";
 import { createClient } from "@/lib/supabase/client";
 
 function LoginForm() {
@@ -48,7 +49,10 @@ function LoginForm() {
         </>
       }
     >
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
+        <GoogleButton label="Sign in with Google" />
+        <OrDivider />
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {error && (
           <div
             className="flex items-start gap-2 rounded-xl border p-3 text-sm"
@@ -110,7 +114,8 @@ function LoginForm() {
           </Link>
           .
         </p>
-      </form>
+        </form>
+      </div>
     </AuthFrame>
   );
 }
