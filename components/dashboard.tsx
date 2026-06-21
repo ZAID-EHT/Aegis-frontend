@@ -8,7 +8,13 @@ import { AlertTriangle, Copy, Inbox, UserRound } from "lucide-react";
 
 import { EvidenceBar } from "@/components/aegis/evidence-bar";
 import { HealthRing } from "@/components/aegis/health-ring";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import type { AlertView, RunResponse, StudentProfile, TeamView } from "@/lib/api";
 import { type makeLookups, titleCase, utilisationPct } from "@/lib/format";
@@ -108,16 +114,16 @@ export function TeamCard({ team }: { team: TeamView }) {
 export function SkillCheck({ student }: { student: StudentProfile }) {
   const adjusted = student.skills.some((s) => s.corrected);
   return (
-    <Card className="flex flex-col gap-5 p-6">
-      <div>
-        <h3 className="text-base font-semibold text-foreground">Skill check · {student.name}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+    <Card>
+      <CardHeader>
+        <CardTitle>Skill check · {student.name}</CardTitle>
+        <CardDescription>
           {adjusted
             ? "One self-reported skill was adjusted to match the evidence on record."
             : "Skills checked against the evidence on record."}
-        </p>
-      </div>
-      <div className="flex flex-col gap-4">
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
         {student.skills.map((s) => (
           <EvidenceBar
             key={s.discipline}
@@ -127,7 +133,7 @@ export function SkillCheck({ student }: { student: StudentProfile }) {
             confidence={s.corrected ? 0.5 : asConfidence(s.confidence)}
           />
         ))}
-      </div>
+      </CardContent>
     </Card>
   );
 }
@@ -138,13 +144,15 @@ export function ReviewPanel({ data, lookups }: { data: RunResponse; lookups: Loo
   const titleA = dup ? lookups.projectTitle(dup.project_a) : null;
   const titleB = dup ? lookups.projectTitle(dup.project_b) : null;
   return (
-    <Card className="flex flex-col gap-5 p-6">
-      <h3 className="text-base font-semibold text-foreground">Things to review</h3>
-
-      <div className="flex flex-col gap-2">
-        <span className="flex items-center gap-2 text-sm text-foreground">
-          <Copy className="h-4 w-4 text-muted-foreground" /> Similar project ideas
-        </span>
+    <Card>
+      <CardHeader>
+        <CardTitle>Things to review</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <span className="flex items-center gap-2 text-sm text-foreground">
+            <Copy className="h-4 w-4 text-muted-foreground" /> Similar project ideas
+          </span>
         {dup ? (
           <div className="rounded-2xl bg-[color-mix(in_oklch,var(--at-risk)_11%,transparent)] p-3.5">
             <div className="flex items-center justify-between gap-2">
@@ -170,7 +178,8 @@ export function ReviewPanel({ data, lookups }: { data: RunResponse; lookups: Loo
         <span className="text-sm text-muted-foreground">
           {data.exception_pool.length === 0 ? "Everyone placed" : `${data.exception_pool.length}`}
         </span>
-      </div>
+        </div>
+      </CardContent>
     </Card>
   );
 }

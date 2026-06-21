@@ -1,32 +1,66 @@
 import * as React from "react";
+
 import { cn } from "@/lib/utils";
 
-/** Soft, rounded surface — the building block of the dashboard. */
-export function Card({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+/**
+ * Card — shadcn composable pattern (forwardRef + Header/Title/Description/Content/
+ * Footer + displayName), styled with the AEGIS premium tokens: a generous radius,
+ * a hairline border, and the soft layered card shadow (not the flat shadcn default).
+ * Card carries no padding; the parts (or a className) supply it, so existing
+ * `<Card className="p-6">` usages keep working.
+ */
+const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
     <div
+      ref={ref}
       className={cn(
-        "rounded-3xl border border-border/60 bg-card shadow-card transition-shadow",
+        "rounded-3xl border border-border/60 bg-card text-card-foreground shadow-card transition-shadow",
         className,
       )}
       {...props}
     />
-  );
-}
+  ),
+);
+Card.displayName = "Card";
 
-export function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("flex items-center gap-2.5 px-6 pt-5", className)} {...props} />;
-}
+const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("flex flex-col gap-1.5 p-6", className)} {...props} />
+  ),
+);
+CardHeader.displayName = "CardHeader";
 
-export function CardTitle({ className, ...props }: React.ComponentProps<"h3">) {
-  return (
+const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => (
     <h3
-      className={cn("text-sm font-semibold tracking-tight text-foreground", className)}
+      ref={ref}
+      className={cn("text-base font-semibold tracking-tight text-foreground", className)}
       {...props}
     />
-  );
-}
+  ),
+);
+CardTitle.displayName = "CardTitle";
 
-export function CardBody({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("p-6", className)} {...props} />;
-}
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
+));
+CardDescription.displayName = "CardDescription";
+
+const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  ),
+);
+CardContent.displayName = "CardContent";
+
+const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("flex items-center p-6 pt-0", className)} {...props} />
+  ),
+);
+CardFooter.displayName = "CardFooter";
+
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter };
