@@ -2,8 +2,14 @@
 
 import { MotionConfig } from "framer-motion";
 
-/** App-wide motion config: every framer-motion animation honours the user's
- *  reduced-motion preference automatically (transforms collapse to crossfade). */
+import { UserProvider } from "@/components/auth/user-provider";
+
+/** App-wide providers: reduced-motion-aware motion config + a single auth-state
+ *  source (fetched once, shared across the app instead of per page mount). */
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
+  return (
+    <MotionConfig reducedMotion="user">
+      <UserProvider>{children}</UserProvider>
+    </MotionConfig>
+  );
 }

@@ -16,7 +16,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { Logo } from "@/components/aegis/logo";
 import { ThemeToggle } from "@/components/aegis/theme-toggle";
-import { useUser } from "@/lib/use-user";
+import { useUser } from "@/components/auth/user-provider";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -137,7 +137,7 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
       />
 
       {/* MOBILE TOP BAR */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl md:hidden">
+      <header className="sticky top-0 z-[var(--z-sticky)] flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl md:hidden">
         <Logo />
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
@@ -156,14 +156,14 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
         {drawer && (
           <>
             <motion.div
-              className="fixed inset-0 z-40 bg-foreground/30 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-[var(--z-overlay)] bg-foreground/30 backdrop-blur-sm md:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setDrawer(false)}
             />
             <motion.aside
-              className="fixed inset-y-0 left-0 z-50 flex w-[270px] flex-col gap-1 bg-sidebar p-4 shadow-card-lg md:hidden"
+              className="fixed inset-y-0 left-0 z-[var(--z-drawer)] flex w-[270px] flex-col gap-1 bg-sidebar p-4 shadow-card-lg md:hidden"
               initial={{ x: reduce ? 0 : "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: reduce ? 0 : "-100%" }}

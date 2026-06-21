@@ -98,6 +98,12 @@
   --dur-base:  220ms;
   --dur-slow:  320ms;
   --dur-slower:480ms;
+
+  /* semantic z-index scale (sticky < overlay < drawer < modal) */
+  --z-sticky:  30;
+  --z-overlay: 40;
+  --z-drawer:  50;
+  --z-modal:   60;
 }
 
 /* ----------------------------------------------------------------------------

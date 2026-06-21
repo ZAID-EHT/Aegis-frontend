@@ -65,7 +65,7 @@ export function CardZoom({
           <AnimatePresence>
             {open && (
               <motion.div
-                className="fixed inset-0 z-50 grid place-items-center p-6"
+                className="fixed inset-0 z-[var(--z-modal)] grid place-items-center p-6"
                 role="dialog"
                 aria-modal="true"
                 onClick={() => setOpen(false)}

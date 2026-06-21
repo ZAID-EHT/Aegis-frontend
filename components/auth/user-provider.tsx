@@ -2,12 +2,19 @@
 
 import * as React from "react";
 import type { User } from "@supabase/supabase-js";
+
 import { createClient } from "@/lib/supabase/client";
 
 export interface SessionUser {
   email: string;
   name: string;
   role: string;
+}
+
+interface UserContextValue {
+  user: SessionUser | null;
+  loading: boolean;
+  signOut: () => Promise<void>;
 }
 
 function toUser(u: User): SessionUser {
@@ -19,8 +26,11 @@ function toUser(u: User): SessionUser {
   };
 }
 
-/** Current Supabase auth user + a sign-out action, kept live via auth state changes. */
-export function useUser() {
+const UserContext = React.createContext<UserContextValue | null>(null);
+
+/** App-wide auth state: fetched once and kept live via auth state changes, so it
+ *  survives client-side navigation instead of refetching on every page mount. */
+export function UserProvider({ children }: { children: React.ReactNode }) {
   const supabase = React.useMemo(() => createClient(), []);
   const [user, setUser] = React.useState<SessionUser | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -46,5 +56,15 @@ export function useUser() {
     window.location.href = "/login";
   }, [supabase]);
 
-  return { user, loading, signOut };
+  const value = React.useMemo<UserContextValue>(
+    () => ({ user, loading, signOut }),
+    [user, loading, signOut],
+  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+}
+
+export function useUser(): UserContextValue {
+  const ctx = React.useContext(UserContext);
+  if (!ctx) throw new Error("useUser must be used within UserProvider");
+  return ctx;
 }
