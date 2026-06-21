@@ -14,10 +14,10 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const C_BASIS: Record<string, string> = {
-  "1": "Verified grade",
+  "1": "Verified",
   "0.8": "Portfolio",
-  "0.6": "Self-report",
-  "0.5": "Contradicted by throughput",
+  "0.6": "Self-reported",
+  "0.5": "Adjusted after review",
 };
 
 export interface EvidenceBarProps {
@@ -56,7 +56,7 @@ export function EvidenceBar({
           )}
           title={basis}
         >
-          C&nbsp;{confidence.toFixed(1)} · {basis}
+          {basis}
         </span>
       </div>
 
@@ -78,9 +78,9 @@ export function EvidenceBar({
       </div>
 
       <div className="nums flex justify-between text-[0.6875rem] text-muted-foreground">
-        <span>declared {declared.toFixed(1)}</span>
+        <span>Claimed {declared.toFixed(1)}</span>
         <span className={cn(corrected && "font-medium text-foreground")}>
-          adjusted {adjusted.toFixed(1)}
+          Counted {adjusted.toFixed(1)}
         </span>
       </div>
     </div>

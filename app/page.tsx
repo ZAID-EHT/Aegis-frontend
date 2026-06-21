@@ -20,33 +20,24 @@ import { HealthRing } from "@/components/aegis/health-ring";
 import { PipelineStepper } from "@/components/aegis/pipeline-stepper";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
+import { type RunResponse, type StudentProfile, type TeamView, runPipeline } from "@/lib/api";
+import { makeLookups, titleCase, utilisationPct } from "@/lib/format";
 import {
-  type AlertView,
-  type RunResponse,
-  type StudentProfile,
-  type TeamView,
-  runPipeline,
-} from "@/lib/api";
-import {
-  BAND_LABEL,
-  bandTone,
-  describeAlert,
-  makeLookups,
-  severityTone,
-  SEVERITY_LABEL,
-  titleCase,
-  utilisationPct,
-} from "@/lib/format";
+  PIPELINE_STEPS,
+  RECOMMENDATION,
+  SUMMARY,
+  band,
+  friendlyAlert,
+} from "@/lib/labels";
+import { sampleRun } from "@/lib/sample-run";
 
-type Status = "idle" | "running" | "done" | "error";
+type Status = "idle" | "running" | "done";
 type Lookups = ReturnType<typeof makeLookups>;
 
 const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
 const asConfidence = (c: number): 1 | 0.8 | 0.6 | 0.5 =>
   near(c, 1) ? 1 : near(c, 0.8) ? 0.8 : near(c, 0.5) ? 0.5 : 0.6;
 
-// ease-out-expo; genuine sibling stagger (not a per-section fade). MotionConfig
-// (app/providers) collapses these to a crossfade under prefers-reduced-motion.
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const stagger: Variants = {
   hidden: {},
@@ -57,17 +48,15 @@ const rise: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
 };
 
-// ── summary stat tile ─────────────────────────────────────────────────────────
+// ── summary tile ────────────────────────────────────────────────────────────
 function StatTile({
   icon: Icon,
   label,
   value,
-  hint,
 }: {
   icon: typeof Users;
   label: string;
   value: React.ReactNode;
-  hint?: string;
 }) {
   return (
     <Card className="flex items-center gap-4 p-5">
@@ -75,11 +64,8 @@ function StatTile({
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <p className="mt-0.5 text-xl font-semibold tracking-tight tabular-nums text-foreground">
-          {value}
-        </p>
-        {hint && <p className="text-[0.7rem] text-muted-foreground">{hint}</p>}
+        <p className="text-2xl font-semibold tracking-tight tabular-nums text-foreground">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
       </div>
     </Card>
   );
@@ -87,69 +73,68 @@ function StatTile({
 
 // ── team card ─────────────────────────────────────────────────────────────────
 function TeamCard({ team }: { team: TeamView }) {
-  const tone = bandTone(team.band);
-  const color = `var(--${team.band === "at_risk" ? "at-risk" : team.band})`;
+  const status = band(team.band);
+  const needsBalancing = team.unallocated_hours > 0 || team.members.some((m) => m.overloaded);
   return (
-    <Card className="flex flex-col gap-4 p-6">
+    <Card className="flex flex-col gap-5 p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground">
-            Team
-          </p>
-          <h3 className="mt-0.5 truncate text-base font-semibold text-foreground">
-            {team.project_title}
-          </h3>
+          <h3 className="truncate text-base font-semibold text-foreground">{team.project_title}</h3>
           <div className="mt-2">
-            <StatusBadge tone={tone} dot>
-              {BAND_LABEL[team.band]}
+            <StatusBadge tone={status.tone} dot>
+              {status.label}
             </StatusBadge>
           </div>
         </div>
-        <HealthRing value={team.health_score} size={86} strokeWidth={9} showBand={false} />
+        <HealthRing value={team.health_score} size={84} strokeWidth={9} showBand={false} />
       </div>
 
-      <div className="h-px bg-border/70" />
+      <div className="h-px bg-border/60" />
 
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-2.5">
         {team.members.map((m) => (
           <li key={m.student_id} className="flex items-center justify-between gap-3 text-sm">
-            <span className="flex items-center gap-2 text-foreground">
+            <span className="truncate text-foreground">{m.name}</span>
+            {m.overloaded ? (
               <span
-                className="h-6 w-6 shrink-0 rounded-full"
-                style={{ background: `color-mix(in oklch, ${color} 22%, var(--secondary))` }}
-              />
-              {m.name}
-            </span>
-            <span
-              className={`text-xs tabular-nums ${m.overloaded ? "font-semibold" : "text-muted-foreground"}`}
-              style={m.overloaded ? { color: "var(--at-risk-ink)" } : undefined}
-            >
-              {utilisationPct(m.utilisation)}
-              {m.overloaded ? " · over" : ""}
-            </span>
+                className="shrink-0 text-xs font-medium"
+                style={{ color: "var(--at-risk-ink)" }}
+              >
+                Over capacity
+              </span>
+            ) : (
+              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                {utilisationPct(m.utilisation)}
+              </span>
+            )}
           </li>
         ))}
       </ul>
 
-      {team.unallocated_hours > 0 && (
-        <p className="flex items-center gap-1.5 rounded-xl bg-[color-mix(in_oklch,var(--at-risk)_12%,transparent)] px-3 py-2 text-xs text-[var(--at-risk-ink)]">
+      {needsBalancing && (
+        <p
+          className="flex items-center gap-1.5 rounded-xl bg-[color-mix(in_oklch,var(--at-risk)_12%,transparent)] px-3 py-2 text-xs"
+          style={{ color: "var(--at-risk-ink)" }}
+        >
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          <span className="tabular-nums">{team.unallocated_hours}h</span> beyond safe capacity —
-          rebalance suggested
+          {RECOMMENDATION.overload}
         </p>
       )}
     </Card>
   );
 }
 
-// ── evidence (Dunning-Kruger) ───────────────────────────────────────────────────
-function EvidencePanel({ student }: { student: StudentProfile }) {
+// ── skill check (evidence-weighted) ──────────────────────────────────────────
+function SkillCheck({ student }: { student: StudentProfile }) {
+  const adjusted = student.skills.some((s) => s.corrected);
   return (
     <Card className="flex flex-col gap-5 p-6">
       <div>
-        <h3 className="text-base font-semibold text-foreground">Evidence-weighted profile</h3>
+        <h3 className="text-base font-semibold text-foreground">Skill check · {student.name}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{student.name}</span> — {student.rationale}
+          {adjusted
+            ? "One self-reported skill was adjusted to match the evidence on record."
+            : "Skills checked against the evidence on record."}
         </p>
       </div>
       <div className="flex flex-col gap-4">
@@ -167,84 +152,70 @@ function EvidencePanel({ student }: { student: StudentProfile }) {
   );
 }
 
-// ── conflict detection ──────────────────────────────────────────────────────────
-function ConflictPanel({ data }: { data: RunResponse }) {
+// ── things to review ──────────────────────────────────────────────────────────
+function ReviewPanel({ data }: { data: RunResponse }) {
+  const dup = data.duplicate_flags[0];
   return (
     <Card className="flex flex-col gap-5 p-6">
-      <h3 className="text-base font-semibold text-foreground">Conflicts &amp; exceptions</h3>
+      <h3 className="text-base font-semibold text-foreground">Things to review</h3>
 
-      <div className="flex flex-col gap-2">
-        <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <Copy className="h-4 w-4 text-muted-foreground" /> Overlapping proposals
-        </p>
-        {data.duplicate_flags.length === 0 ? (
-          <p className="text-sm text-muted-foreground">None flagged for review.</p>
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex items-center gap-2 text-sm text-foreground">
+          <Copy className="h-4 w-4 text-muted-foreground" /> Similar project ideas
+        </span>
+        {dup ? (
+          <StatusBadge tone="at_risk">{Math.round(dup.similarity * 100)}% alike</StatusBadge>
         ) : (
-          data.duplicate_flags.map((d) => (
-            <div
-              key={`${d.project_a}-${d.project_b}`}
-              className="flex items-center justify-between rounded-xl bg-secondary/60 px-3.5 py-2.5"
-            >
-              <span className="text-sm text-foreground">Two proposals overlap</span>
-              <StatusBadge tone="at_risk">{Math.round(d.similarity * 100)}% match</StatusBadge>
-            </div>
-          ))
+          <span className="text-sm text-muted-foreground">None</span>
         )}
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-border/70 pt-4">
-        <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <UserRound className="h-4 w-4 text-muted-foreground" /> Needs faculty review
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {data.exception_pool.length === 0
-            ? "Every student was placed — nothing pending."
-            : `${data.exception_pool.length} student(s) awaiting manual placement.`}
-        </p>
+      <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-4">
+        <span className="flex items-center gap-2 text-sm text-foreground">
+          <UserRound className="h-4 w-4 text-muted-foreground" /> Needs manual placement
+        </span>
+        <span className="text-sm text-muted-foreground">
+          {data.exception_pool.length === 0 ? "Everyone placed" : `${data.exception_pool.length}`}
+        </span>
       </div>
     </Card>
   );
 }
 
-// ── alert inbox (right rail) ────────────────────────────────────────────────────
-function AlertRow({ alert, lookups }: { alert: AlertView; lookups: Lookups }) {
-  const tone = severityTone(alert.severity);
-  const { title, context } = describeAlert(alert, lookups);
+// ── attention list (right rail) ──────────────────────────────────────────────
+function AlertRow({ alert, lookups }: { alert: RunResponse["alerts"][number]; lookups: Lookups }) {
+  const a = friendlyAlert(alert, lookups);
   return (
     <motion.div
       variants={rise}
-      className="rounded-2xl border border-border/60 bg-card p-3.5 shadow-card"
+      className="rounded-2xl border border-border/60 bg-card p-4 shadow-card"
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-semibold text-foreground">{title}</span>
-        <StatusBadge tone={tone} dot>
-          {SEVERITY_LABEL[alert.severity]}
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-sm font-semibold text-foreground">{a.title}</span>
+        <StatusBadge tone={a.tone} dot>
+          {a.severity}
         </StatusBadge>
       </div>
-      {context && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{context}</p>}
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>
+      {a.context && <p className="mt-1.5 text-xs font-medium text-foreground/70">{a.context}</p>}
     </motion.div>
   );
 }
 
-function AlertInbox({ alerts, lookups }: { alerts: AlertView[]; lookups: Lookups }) {
+function AttentionList({ alerts, lookups }: { alerts: RunResponse["alerts"]; lookups: Lookups }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2 px-1">
         <Inbox className="h-4 w-4 text-muted-foreground" />
-        <h2 className="text-sm font-semibold text-foreground">Attention needed</h2>
+        <h2 className="text-sm font-semibold text-foreground">Needs your attention</h2>
         <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
           {alerts.length}
         </span>
       </div>
       {alerts.length === 0 ? (
-        <Card className="p-5 text-sm text-muted-foreground">All clear — no alerts.</Card>
+        <Card className="p-5 text-sm text-muted-foreground">All clear — nothing to review.</Card>
       ) : (
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate="show"
-          className="flex flex-col gap-3"
-        >
+        <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-3">
           {alerts.map((a, i) => (
             <AlertRow key={`${a.trigger_type}-${i}`} alert={a} lookups={lookups} />
           ))}
@@ -260,23 +231,24 @@ export default function Page() {
   const [status, setStatus] = React.useState<Status>("idle");
   const [stage, setStage] = React.useState(1);
   const [data, setData] = React.useState<RunResponse | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
+  const [sample, setSample] = React.useState(false);
 
   const runAllocation = React.useCallback(async () => {
     setStatus("running");
-    setError(null);
     setStage(1);
     const ticker = setInterval(() => setStage((s) => Math.min(s + 1, 5)), 450);
     try {
       const result = await runPipeline();
+      setSample(false);
+      setData(result);
+    } catch {
+      // Live service unavailable — fall back to the clean sample dataset (clearly labelled).
+      setSample(true);
+      setData(sampleRun);
+    } finally {
       clearInterval(ticker);
       setStage(5);
-      setData(result);
       setStatus("done");
-    } catch (e) {
-      clearInterval(ticker);
-      setError(e instanceof Error ? e.message : "Unknown error");
-      setStatus("error");
     }
   }, []);
 
@@ -285,21 +257,28 @@ export default function Page() {
     [data],
   );
   const spotlight = data?.student_profiles.find((p) => p.skills.some((s) => s.corrected));
-  const bandCount = (b: string) => data?.teams.filter((t) => t.band === b).length ?? 0;
+  const count = (b: string) => data?.teams.filter((t) => t.band === b).length ?? 0;
 
   return (
     <AppShell
       active="overview"
       onNavigate={(key) => router.push(key === "settings" ? "/admin" : "/")}
-      rail={data && lookups ? <AlertInbox alerts={data.alerts} lookups={lookups} /> : undefined}
+      rail={data && lookups ? <AttentionList alerts={data.alerts} lookups={lookups} /> : undefined}
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {/* header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Allocation overview</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Allocation overview</h1>
+              {sample && (
+                <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  Sample data
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Evidence-weighted scoring, fair team formation, and gentle engagement monitoring.
+              Balanced teams at a glance — and anything that needs your attention.
             </p>
           </div>
           <motion.button
@@ -314,31 +293,24 @@ export default function Page() {
             ) : (
               <Play className="h-4 w-4" />
             )}
-            {status === "running" ? "Running…" : "Run allocation"}
+            {status === "running" ? "Working…" : "Run allocation"}
           </motion.button>
         </div>
 
-        <PipelineStepper current={stage} done={status === "done"} />
-
-        {status === "error" && (
-          <Card className="border-[color-mix(in_oklch,var(--critical)_35%,transparent)] p-4 text-sm text-[var(--critical)]">
-            {error}
-          </Card>
-        )}
+        <PipelineStepper stages={PIPELINE_STEPS} current={stage} done={status === "done"} />
 
         {status === "idle" && (
           <Card className="border-dashed bg-secondary/30 p-12 text-center">
             <ShieldCheck className="mx-auto h-8 w-8 text-primary/60" />
-            <p className="mt-3 text-sm text-muted-foreground">
-              Press <span className="font-semibold text-foreground">Run allocation</span> to form
-              teams and surface anything that needs attention.
+            <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
+              Run an allocation to form balanced teams and surface anything that needs a closer look.
             </p>
           </Card>
         )}
 
         {data && lookups && (
           <>
-            {/* summary stats — staggered tiles */}
+            {/* summary */}
             <motion.div
               variants={stagger}
               initial="hidden"
@@ -346,30 +318,29 @@ export default function Page() {
               className="grid grid-cols-2 gap-4 lg:grid-cols-4"
             >
               <motion.div variants={rise}>
-                <StatTile icon={Users} label="Teams formed" value={data.teams.length} />
+                <StatTile icon={Users} label={SUMMARY.teams} value={data.teams.length} />
               </motion.div>
               <motion.div variants={rise}>
-                <StatTile icon={ShieldCheck} label="Healthy" value={bandCount("healthy")} hint="score ≥ 75" />
+                <StatTile icon={ShieldCheck} label={SUMMARY.onTrack} value={count("healthy")} />
               </motion.div>
               <motion.div variants={rise}>
                 <StatTile
                   icon={AlertTriangle}
-                  label="Need a look"
-                  value={bandCount("at_risk") + bandCount("critical")}
-                  hint="at risk or critical"
+                  label={SUMMARY.attention}
+                  value={count("at_risk") + count("critical")}
                 />
               </motion.div>
               <motion.div variants={rise}>
-                <StatTile icon={Inbox} label="Open alerts" value={data.alerts.length} />
+                <StatTile icon={Inbox} label={SUMMARY.alerts} value={data.alerts.length} />
               </motion.div>
             </motion.div>
 
-            {/* teams — staggered cards with a hover lift */}
+            {/* teams */}
             <motion.div
               variants={stagger}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+              className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
             >
               {data.teams.map((t) => (
                 <motion.div
@@ -383,30 +354,30 @@ export default function Page() {
               ))}
             </motion.div>
 
-            {/* evidence + conflicts */}
+            {/* skill check + review */}
             <motion.div
               variants={stagger}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+              className="grid grid-cols-1 gap-5 lg:grid-cols-2"
             >
               <motion.div variants={rise}>
                 {spotlight ? (
-                  <EvidencePanel student={spotlight} />
+                  <SkillCheck student={spotlight} />
                 ) : (
                   <Card className="flex h-full items-center p-6 text-sm text-muted-foreground">
-                    No evidence corrections were needed this run.
+                    No skill adjustments were needed this run.
                   </Card>
                 )}
               </motion.div>
               <motion.div variants={rise}>
-                <ConflictPanel data={data} />
+                <ReviewPanel data={data} />
               </motion.div>
             </motion.div>
 
-            {/* alerts inline on smaller screens (rail hidden < xl) */}
+            {/* attention list inline below xl */}
             <div className="xl:hidden">
-              <AlertInbox alerts={data.alerts} lookups={lookups} />
+              <AttentionList alerts={data.alerts} lookups={lookups} />
             </div>
           </>
         )}

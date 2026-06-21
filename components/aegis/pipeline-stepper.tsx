@@ -22,11 +22,11 @@ export interface Stage {
 }
 
 const DEFAULT_STAGES: Stage[] = [
-  { key: "verify", label: "Verify", hint: "Â = L × C" },
-  { key: "dedupe", label: "Dedupe", hint: "cosine ≥ 0.75" },
-  { key: "match", label: "Match", hint: "SPA" },
-  { key: "form", label: "Form", hint: "maximin" },
-  { key: "monitor", label: "Monitor", hint: "health + alerts" },
+  { key: "check", label: "Check details" },
+  { key: "dedupe", label: "Remove duplicates" },
+  { key: "match", label: "Match preferences" },
+  { key: "form", label: "Form teams" },
+  { key: "review", label: "Review alerts" },
 ];
 
 export interface PipelineStepperProps {
@@ -100,17 +100,12 @@ export function PipelineStepper({
               <div className="flex flex-col items-center text-center">
                 <span
                   className={cn(
-                    "text-xs font-semibold",
+                    "text-xs font-medium",
                     state === "todo" ? "text-muted-foreground" : "text-foreground",
                   )}
                 >
                   {stage.label}
                 </span>
-                {stage.hint && (
-                  <span className="nums mt-0.5 text-[0.625rem] text-muted-foreground">
-                    {stage.hint}
-                  </span>
-                )}
               </div>
             </div>
           );
