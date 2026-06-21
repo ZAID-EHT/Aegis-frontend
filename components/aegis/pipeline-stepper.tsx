@@ -81,10 +81,19 @@ export function PipelineStepper({
                 initial={false}
                 animate={
                   state === "active" && !reduce
-                    ? { boxShadow: "0 0 0 5px color-mix(in oklch, var(--primary) 16%, transparent)" }
+                    ? {
+                        boxShadow: [
+                          "0 0 0 0px color-mix(in oklch, var(--primary) 30%, transparent)",
+                          "0 0 0 8px color-mix(in oklch, var(--primary) 0%, transparent)",
+                        ],
+                      }
                     : { boxShadow: "0 0 0 0px transparent" }
                 }
-                transition={{ duration: 0.3 }}
+                transition={
+                  state === "active" && !reduce
+                    ? { duration: 1.5, repeat: Infinity, ease: "easeOut" }
+                    : { duration: 0.3 }
+                }
               >
                 {state === "done" ? <Check className="h-4 w-4" strokeWidth={3} /> : idx}
               </motion.div>
