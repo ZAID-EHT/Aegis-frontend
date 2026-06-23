@@ -24,6 +24,9 @@ client_secret*.json
 # Supabase / DB
 .supabase/
 supabase/.temp/
+# Staff directory seed — REAL institutional emails, never commit (use the .example template).
+supabase/staff_directory_seed.local.sql
+**/*_seed.local.sql
 
 # ── deps / build (Node + Next.js) ──
 node_modules/
