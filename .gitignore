@@ -28,6 +28,9 @@ supabase/.temp/
 supabase/staff_directory_seed.local.sql
 **/*_seed.local.sql
 
+# Demo judge-account seeder — carries throwaway demo passwords; keep out of the public repo.
+scripts/seed_demo_users.py
+
 # ── deps / build (Node + Next.js) ──
 node_modules/
 .pnp
