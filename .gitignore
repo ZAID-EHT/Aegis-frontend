@@ -19,6 +19,8 @@ client_secret*.json
 # Local tool / agent config — may reference local paths, tokens, or MCP servers
 .claude.json
 .claude/settings.local.json
+.claude.zip
+*.zip
 .mcp.json
 
 # Supabase / DB
@@ -30,6 +32,8 @@ supabase/staff_directory_seed.local.sql
 
 # Demo judge-account seeder — carries throwaway demo passwords; keep out of the public repo.
 scripts/seed_demo_users.py
+# Demo student mapper — ties a demo account to a REAL cohort student (name/PII); keep local.
+scripts/map_demo_student.py
 
 # ── deps / build (Node + Next.js) ──
 node_modules/

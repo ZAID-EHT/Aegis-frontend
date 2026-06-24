@@ -8,13 +8,17 @@ import { AppShell } from "@/components/aegis/app-shell";
 import { PipelineStepper } from "@/components/aegis/pipeline-stepper";
 import { Card } from "@/components/ui/card";
 import { EASE, SampleBadge, StatTile, rise, stagger } from "@/components/dashboard";
+import { useAccessGuard } from "@/components/auth/role-guard";
 import { PIPELINE_STEPS } from "@/lib/labels";
 import { routeFor } from "@/lib/nav";
 import { useRun } from "@/lib/use-run";
 
 export default function PipelinePage() {
   const router = useRouter();
+  const ready = useAccessGuard("pipeline");
   const { status, stage, data, sample, run } = useRun();
+
+  if (!ready) return null;
 
   return (
     <AppShell active="pipeline" onNavigate={(key) => router.push(routeFor(key))}>

@@ -102,7 +102,26 @@ export interface IntegrityView {
   entries: number;
 }
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+/**
+ * Base URL for the FastAPI backend.
+ *
+ * In the browser we ALWAYS target the same host the page was served from, on
+ * :8000 — so it works on localhost, over the LAN, and survives Wi‑Fi/IP changes
+ * with no rebuild. An explicit NEXT_PUBLIC_API_URL still wins (e.g. a remote API).
+ * On the server we fall back to the env var or localhost.
+ */
+function resolveApiBase(): string {
+  // In the browser, ALWAYS target the same host the page came from on :8000.
+  // The API is always co-located with the web app in this project, so this is
+  // correct everywhere and immune to a stale NEXT_PUBLIC_API_URL in .env(.local).
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+  }
+  // Server-side (SSR/build): env override, else localhost.
+  return process.env.NEXT_PUBLIC_API_URL?.trim() || "http://localhost:8000";
+}
+
+export const API_URL = resolveApiBase();
 
 /**
  * Authorization header for /admin/* calls: the logged-in USER's Supabase access

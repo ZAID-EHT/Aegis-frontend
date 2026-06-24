@@ -9,6 +9,9 @@ export interface SessionUser {
   email: string;
   name: string;
   role: string;
+  /** Cohort student id (set in user_metadata for student accounts) — used to
+   *  resolve a student to their own team in the workspace view. */
+  studentId: string | null;
 }
 
 interface UserContextValue {
@@ -23,6 +26,7 @@ function toUser(u: User): SessionUser {
     email: u.email ?? "",
     name: (meta.full_name as string) || (u.email?.split("@")[0] ?? "Account"),
     role: (meta.role as string) || "Member",
+    studentId: (meta.student_id as string) || null,
   };
 }
 

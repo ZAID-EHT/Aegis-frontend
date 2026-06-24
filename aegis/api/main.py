@@ -31,9 +31,19 @@ from aegis.governance.audit import verify
 from aegis.governance.models import GovernanceData
 
 app = FastAPI(title="AEGIS", version="1.0.0", description="Capstone allocation engine API")
+# Allow the dashboard on :3000 from localhost OR any private-LAN address, so the
+# demo survives Wi-Fi/IP changes and shared-network previews without a restart.
+# Private ranges: 10.x, 172.16-31.x, 192.168.x  (RFC 1918) + localhost/127.0.0.1.
+_cors_regex = (
+    r"^http://(localhost|127\.0\.0\.1"
+    r"|10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+    r"|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}"
+    r"|192\.168\.\d{1,3}\.\d{1,3})"
+    r"(:\d+)?$"
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origin_regex=_cors_regex,
     allow_methods=["*"],
     allow_headers=["*"],
 )

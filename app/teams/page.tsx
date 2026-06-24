@@ -14,14 +14,18 @@ import {
   rise,
   stagger,
 } from "@/components/dashboard";
+import { useAccessGuard } from "@/components/auth/role-guard";
 import { SUMMARY } from "@/lib/labels";
 import { routeFor } from "@/lib/nav";
 import { useRun } from "@/lib/use-run";
 
 export default function TeamsPage() {
   const router = useRouter();
-  const { data, sample } = useRun(true);
+  const ready = useAccessGuard("teams");
+  const { data, sample } = useRun(ready);
   const count = (b: string) => data?.teams.filter((t) => t.band === b).length ?? 0;
+
+  if (!ready) return null;
 
   return (
     <AppShell active="teams" onNavigate={(key) => router.push(routeFor(key))}>

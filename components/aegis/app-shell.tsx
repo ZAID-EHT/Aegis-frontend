@@ -11,12 +11,24 @@
 
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { GitBranch, LayoutGrid, LogOut, Menu, Settings, ShieldAlert, Users, X } from "lucide-react";
+import {
+  GitBranch,
+  LayoutGrid,
+  LogOut,
+  Menu,
+  Settings,
+  ShieldAlert,
+  SlidersHorizontal,
+  UserRound,
+  Users,
+  X,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { Logo } from "@/components/aegis/logo";
 import { ThemeToggle } from "@/components/aegis/theme-toggle";
 import { useUser } from "@/components/auth/user-provider";
+import { isStudent, navKeysFor } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -30,7 +42,9 @@ const NAV: NavItem[] = [
   { key: "teams", label: "Teams", icon: Users },
   { key: "alerts", label: "Alerts", icon: ShieldAlert },
   { key: "pipeline", label: "Pipeline", icon: GitBranch },
+  { key: "profile", label: "My profile", icon: UserRound },
   { key: "settings", label: "Governance", icon: Settings },
+  { key: "account", label: "Settings", icon: SlidersHorizontal },
 ];
 
 export interface AppShellProps {
@@ -75,6 +89,13 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
   const displayName = user?.name ?? "Account";
   const displayRole = user?.role ?? "Member";
 
+  // Role-scoped nav: students see only their workspace; lecturers get everything
+  // but Governance; admins get all. "Overview" reads as "My workspace" for students.
+  const allowed = navKeysFor(user?.role);
+  const nav = NAV.filter((i) => allowed.includes(i.key)).map((i) =>
+    i.key === "overview" && isStudent(user?.role) ? { ...i, label: "My workspace" } : i,
+  );
+
   const NavButton = ({ item, layoutKey }: { item: NavItem; layoutKey: string }) => {
     const isActive = item.key === active;
     const Icon = item.icon;
@@ -111,7 +132,7 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
         <Logo />
       </div>
       <nav className="mt-2 flex flex-col gap-1">
-        {NAV.map((i) => (
+        {nav.map((i) => (
           <NavButton key={i.key} item={i} layoutKey={layoutKey} />
         ))}
       </nav>
@@ -180,7 +201,7 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
                 </button>
               </div>
               <nav className="mt-1 flex flex-col gap-1">
-                {NAV.map((i) => (
+                {nav.map((i) => (
                   <NavButton key={i.key} item={i} layoutKey="nav-active-mobile" />
                 ))}
               </nav>

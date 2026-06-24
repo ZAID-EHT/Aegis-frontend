@@ -6,6 +6,9 @@ import { AlertTriangle, Inbox, Loader2, Play, ShieldCheck, Users } from "lucide-
 
 import { AppShell } from "@/components/aegis/app-shell";
 import { PipelineStepper } from "@/components/aegis/pipeline-stepper";
+import { useUser } from "@/components/auth/user-provider";
+import { StudentWorkspace } from "@/components/student-workspace";
+import { isStudent } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import {
   AttentionList,
@@ -24,9 +27,34 @@ import { useRun } from "@/lib/use-run";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { status, stage, data, sample, run, lookups } = useRun();
+  const { user, loading } = useUser();
+  const student = isStudent(user?.role);
+  // Students auto-fetch (their view is read-only); staff drive the run manually.
+  const { status, stage, data, sample, run, lookups } = useRun(!loading && student);
   const spotlight = data?.student_profiles.find((p) => p.skills.some((s) => s.corrected));
   const count = (b: string) => data?.teams.filter((t) => t.band === b).length ?? 0;
+
+  // ── Student: their own team only — never the all-teams overview ──────────────
+  if (!loading && student) {
+    const myTeam =
+      data?.teams.find((t) =>
+        t.members.some((m) => m.student_id === user?.studentId),
+      ) ?? null;
+    const myProfile =
+      data?.student_profiles.find((p) => p.student_id === user?.studentId) ?? null;
+    return (
+      <AppShell active="overview" onNavigate={(key) => router.push(routeFor(key))}>
+        <StudentWorkspace
+          team={myTeam}
+          profile={myProfile}
+          studentId={user?.studentId ?? null}
+          name={user?.name ?? ""}
+          loading={status !== "done"}
+          sample={sample}
+        />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell

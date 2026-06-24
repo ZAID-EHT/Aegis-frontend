@@ -15,13 +15,17 @@ import {
   rise,
   stagger,
 } from "@/components/dashboard";
+import { useAccessGuard } from "@/components/auth/role-guard";
 import { routeFor } from "@/lib/nav";
 import { useRun } from "@/lib/use-run";
 
 export default function AlertsPage() {
   const router = useRouter();
-  const { data, sample, lookups } = useRun(true);
+  const ready = useAccessGuard("alerts");
+  const { data, sample, lookups } = useRun(ready);
   const by = (s: string) => data?.alerts.filter((a) => a.severity === s).length ?? 0;
+
+  if (!ready) return null;
 
   return (
     <AppShell active="alerts" onNavigate={(key) => router.push(routeFor(key))}>

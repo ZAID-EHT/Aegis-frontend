@@ -5,6 +5,8 @@ export const ROUTES: Record<string, string> = {
   alerts: "/alerts",
   pipeline: "/pipeline",
   settings: "/admin", // "Governance" in the sidebar
+  profile: "/profile", // student's own skill profile
+  account: "/settings", // account settings (all roles)
 };
 
 export const routeFor = (key: string): string => ROUTES[key] ?? "/dashboard";

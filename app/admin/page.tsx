@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { GitPullRequestArrow, ScrollText, ShieldCheck, ShieldX, UserCheck } from "lucide-react";
 
 import { AppShell } from "@/components/aegis/app-shell";
+import { useAccessGuard } from "@/components/auth/role-guard";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import { routeFor } from "@/lib/nav";
@@ -106,6 +107,7 @@ function Panel({
 
 export default function AdminPage() {
   const router = useRouter();
+  const ready = useAccessGuard("settings");
   const [integrity, setIntegrity] = React.useState<IntegrityView | null>(null);
   const [audit, setAudit] = React.useState<AuditView[]>([]);
   const [approvals, setApprovals] = React.useState<ApprovalView[]>([]);
@@ -127,6 +129,7 @@ export default function AdminPage() {
   }
 
   React.useEffect(() => {
+    if (!ready) return; // don't fire /admin/* calls until access is confirmed
     Promise.all([getIntegrity(), getAudit(), getApprovals(), getOverrides()])
       .then(([i, a, ap, ov]) => {
         setIntegrity(i);
@@ -135,9 +138,11 @@ export default function AdminPage() {
         setOverrides(ov);
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Failed to load"));
-  }, []);
+  }, [ready]);
 
   const navigate = (key: string) => router.push(routeFor(key));
+
+  if (!ready) return null;
 
   return (
     <AppShell active="settings" onNavigate={navigate}>
