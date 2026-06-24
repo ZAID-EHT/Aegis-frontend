@@ -103,6 +103,19 @@ def main() -> None:
     print(f"OK: {out}  ({size_mb:.2f} MB)")
     print(f"Restore with:  psql \"<connection string>\" -f {out}")
 
+    _prune(int(os.environ.get("AEGIS_BACKUP_KEEP", "14")))
+
+
+def _prune(keep: int) -> None:
+    """Keep only the newest `keep` dumps so scheduled backups don't fill the disk."""
+    dumps = sorted(glob.glob(os.path.join("backups", "aegis_*.sql")), key=os.path.getmtime)
+    for old in dumps[:-keep] if keep > 0 else []:
+        try:
+            os.remove(old)
+            print(f"pruned old backup: {old}")
+        except OSError:
+            pass
+
 
 if __name__ == "__main__":
     main()
