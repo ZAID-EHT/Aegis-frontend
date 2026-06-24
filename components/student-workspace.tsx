@@ -18,9 +18,11 @@ import type { StudentProfile, TeamView } from "@/lib/api";
 import { utilisationPct } from "@/lib/format";
 import { HEALTH_COMPONENT, RECOMMENDATION, band } from "@/lib/labels";
 
+// Slide-only entrance (no opacity) so content can never freeze invisible if the
+// animation is gated by tab-focus/viewport. Visible by default; slide is enhancement.
 const rise = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+  hidden: { y: 12 },
+  show: { y: 0, transition: { duration: 0.45, ease: EASE } },
 };
 
 const BAND_COLOR: Record<string, string> = {

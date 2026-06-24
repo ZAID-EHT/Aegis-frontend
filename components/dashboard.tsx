@@ -30,9 +30,12 @@ export const stagger: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.06, delayChildren: 0.03 } },
 };
+// Entrance reveal: SLIDE ONLY — never animate opacity, so content can never freeze
+// invisible if the animation is gated by tab-focus/viewport. Visible by default;
+// the slide is pure enhancement. Reduced-motion is handled globally (globals.css).
 export const rise: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+  hidden: { y: 12 },
+  show: { y: 0, transition: { duration: 0.45, ease: EASE } },
 };
 
 const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
