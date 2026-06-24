@@ -112,7 +112,7 @@ function MyTeamCard({ team }: { team: TeamView }) {
   const needsBalancing = team.unallocated_hours > 0 || team.members.some((m) => m.overloaded);
 
   return (
-    <Card className="flex flex-col gap-6 p-7">
+    <Card className="flex flex-col gap-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-xl font-bold tracking-tight text-foreground">{team.project_title}</h2>
@@ -216,7 +216,7 @@ function EmptyState({ name }: { name: string }) {
 
 function WorkspaceSkeleton() {
   return (
-    <Card className="flex flex-col gap-5 p-7">
+    <Card className="flex flex-col gap-5 p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2.5">
           <Skeleton className="h-6 w-48" />

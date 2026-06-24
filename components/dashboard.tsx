@@ -54,7 +54,7 @@ export function StatTile({
   value: React.ReactNode;
 }) {
   return (
-    <Card className="flex items-center gap-4 p-5 transition-shadow hover:shadow-card-lg">
+    <Card className="flex items-center gap-4 p-6 transition-shadow hover:shadow-card-lg">
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Icon className="h-5 w-5" />
       </div>
@@ -84,7 +84,7 @@ function TeamCardZoom({ team }: { team: TeamView }) {
   const components = Object.entries(team.components ?? {});
   const needsBalancing = team.unallocated_hours > 0 || team.members.some((m) => m.overloaded);
   return (
-    <Card className="flex flex-col gap-5 p-7">
+    <Card className="flex flex-col gap-5 p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h3 className="text-xl font-bold tracking-tight text-foreground">{team.project_title}</h3>
@@ -300,7 +300,7 @@ export function AttentionList({ alerts, lookups }: { alerts: AlertView[]; lookup
         </span>
       </div>
       {alerts.length === 0 ? (
-        <Card className="p-5 text-sm text-muted-foreground">All clear — nothing to review.</Card>
+        <Card className="p-6 text-sm text-muted-foreground">All clear — nothing to review.</Card>
       ) : (
         <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-3">
           {alerts.map((a, i) => (
@@ -324,7 +324,7 @@ export function SampleBadge() {
 // ── loading skeletons (shape-matched to the real cards) ──────────────────────
 export function StatTileSkeleton() {
   return (
-    <Card className="flex items-center gap-4 p-5">
+    <Card className="flex items-center gap-4 p-6">
       <Skeleton className="h-11 w-11 rounded-2xl" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-6 w-10" />

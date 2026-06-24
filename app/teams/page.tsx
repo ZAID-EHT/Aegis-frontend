@@ -49,7 +49,7 @@ export default function TeamsPage() {
                 <StatTileSkeleton key={i} />
               ))}
             </div>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <TeamCardSkeleton key={i} />
               ))}
@@ -82,7 +82,7 @@ export default function TeamsPage() {
               variants={stagger}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
+              className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
             >
               {data.teams.map((t) => (
                 <motion.div

@@ -64,10 +64,10 @@ function UserCard({
   onSignOut: () => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-secondary/60 p-2.5">
+    <div className="flex items-center gap-3 rounded-2xl bg-secondary/60 p-3">
       <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-chart-1 to-chart-5" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-foreground">{name}</p>
+        <p className="text-sm font-medium leading-tight text-foreground">{name}</p>
         <p className="truncate text-xs capitalize text-muted-foreground">{role}</p>
       </div>
       <button
@@ -128,19 +128,17 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
 
   const SidebarInner = ({ layoutKey }: { layoutKey: string }) => (
     <>
-      <div className="px-2 py-3">
+      <div className="flex items-center justify-between px-2 py-3">
         <Logo />
+        <ThemeToggle />
       </div>
       <nav className="mt-2 flex flex-col gap-1">
         {nav.map((i) => (
           <NavButton key={i.key} item={i} layoutKey={layoutKey} />
         ))}
       </nav>
-      <div className="mt-auto flex items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <UserCard name={displayName} role={displayRole} onSignOut={signOut} />
-        </div>
-        <ThemeToggle />
+      <div className="mt-auto">
+        <UserCard name={displayName} role={displayRole} onSignOut={signOut} />
       </div>
     </>
   );

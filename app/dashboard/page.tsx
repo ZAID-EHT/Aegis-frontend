@@ -132,7 +132,7 @@ export default function DashboardPage() {
               variants={stagger}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
+              className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
             >
               {data.teams.map((t) => (
                 <motion.div
@@ -150,7 +150,7 @@ export default function DashboardPage() {
               variants={stagger}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 gap-5 lg:grid-cols-2"
+              className="grid grid-cols-1 gap-6 lg:grid-cols-2"
             >
               <motion.div variants={rise}>
                 {spotlight ? (
