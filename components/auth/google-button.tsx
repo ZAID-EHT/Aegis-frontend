@@ -38,9 +38,11 @@ export function GoogleButton({ label = "Continue with Google" }: { label?: strin
     setError(null);
     setBusy(true);
     const supabase = createClient();
+    // 0.0.0.0 (dev LAN bind) isn't browsable — send OAuth back to localhost instead.
+    const origin = window.location.origin.replace("0.0.0.0", "localhost");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+      options: { redirectTo: `${origin}/auth/callback?next=/dashboard` },
     });
     if (error) {
       setError(error.message);

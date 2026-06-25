@@ -42,7 +42,8 @@ export default function SignupPage() {
       password,
       options: {
         data: { full_name: name, role },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // 0.0.0.0 (dev LAN bind) isn't browsable — confirm back to localhost instead.
+        emailRedirectTo: `${window.location.origin.replace("0.0.0.0", "localhost")}/auth/callback`,
       },
     });
     if (error) {
