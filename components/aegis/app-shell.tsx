@@ -67,7 +67,7 @@ function UserCard({
     <div className="flex items-center gap-3 rounded-2xl bg-secondary/60 p-3">
       <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-chart-1 to-chart-5" />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium leading-tight text-foreground">{name}</p>
+        <p className="break-words text-sm font-medium leading-tight text-foreground">{name}</p>
         <p className="truncate text-xs capitalize text-muted-foreground">{role}</p>
       </div>
       <button
@@ -211,7 +211,7 @@ export function AppShell({ active = "overview", onNavigate, rail, children }: Ap
 
       <div className="mx-auto flex w-full max-w-[1600px] gap-5 p-4 sm:p-6">
         {/* DESKTOP SIDEBAR */}
-        <aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[248px] shrink-0 flex-col rounded-[1.75rem] border border-border/60 bg-sidebar/85 p-4 shadow-card backdrop-blur-xl md:flex">
+        <aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[272px] shrink-0 flex-col rounded-[1.75rem] border border-border/60 bg-sidebar p-4 shadow-card md:flex">
           <SidebarInner layoutKey="nav-active" />
         </aside>
 

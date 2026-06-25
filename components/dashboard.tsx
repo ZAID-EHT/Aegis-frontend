@@ -43,6 +43,45 @@ const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
 const asConfidence = (c: number): 1 | 0.8 | 0.6 | 0.5 =>
   near(c, 1) ? 1 : near(c, 0.8) ? 0.8 : near(c, 0.5) ? 0.5 : 0.6;
 
+function workloadPct(value: number | null | undefined): string {
+  if (value == null) return "No data";
+  const pct = Math.round(value * 100);
+  return pct > 100 ? `${pct}% relative` : `${pct}%`;
+}
+
+function hasStampedWorkload(team: TeamView): boolean {
+  const values = team.members.map((m) => m.utilisation).filter((v): v is number => v != null);
+  return values.length > 1 && values.every((v) => near(v, values[0]));
+}
+
+function TeamWorkloadSummary({ team }: { team: TeamView }) {
+  const values = team.members.map((m) => m.utilisation).filter((v): v is number => v != null);
+  if (values.length === 0) return null;
+  const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const capped = Math.min(100, Math.max(0, average * 100));
+  const overCapacity = average > 1;
+
+  return (
+    <div className="rounded-2xl bg-secondary/55 p-4">
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="font-medium text-foreground">Relative workload</span>
+        <span className="tnum font-semibold text-foreground">{workloadPct(average)}</span>
+      </div>
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-primary"
+          style={{ width: `${capped}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        {overCapacity
+          ? "Team demand is above the nominal baseline; shown as a team metric."
+          : "Shown once because the live allocation reports this at team level."}
+      </p>
+    </div>
+  );
+}
+
 // ── summary tile ──────────────────────────────────────────────────────────────
 export function StatTile({
   icon: Icon,
@@ -67,15 +106,31 @@ export function StatTile({
 }
 
 // ── team card (hover for the full breakdown) ─────────────────────────────────
-function memberRight(m: TeamView["members"][number]) {
+function memberRight(m: TeamView["members"][number], showWorkload: boolean) {
   return m.overloaded ? (
     <span className="shrink-0 text-xs font-medium" style={{ color: "var(--at-risk-ink)" }}>
       Over capacity
     </span>
-  ) : (
+  ) : !showWorkload ? null : (
     <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
       {utilisationPct(m.utilisation)}
     </span>
+  );
+}
+
+function MemberRow({
+  member,
+  showWorkload,
+}: {
+  member: TeamView["members"][number];
+  showWorkload: boolean;
+}) {
+  const right = memberRight(member, showWorkload);
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="truncate text-foreground">{member.name}</span>
+      {right}
+    </div>
   );
 }
 
@@ -83,6 +138,7 @@ function TeamCardZoom({ team }: { team: TeamView }) {
   const status = band(team.band);
   const components = Object.entries(team.components ?? {});
   const needsBalancing = team.unallocated_hours > 0 || team.members.some((m) => m.overloaded);
+  const stampedWorkload = hasStampedWorkload(team);
   return (
     <Card className="flex flex-col gap-5 p-6">
       <div className="flex items-start justify-between gap-4">
@@ -119,13 +175,12 @@ function TeamCardZoom({ team }: { team: TeamView }) {
         </div>
       )}
 
+      {stampedWorkload && <TeamWorkloadSummary team={team} />}
+
       <div className="flex flex-col gap-2 border-t border-border/60 pt-4">
         <p className="text-xs font-medium text-muted-foreground">Members</p>
         {team.members.map((m) => (
-          <div key={m.student_id} className="flex items-center justify-between gap-3 text-sm">
-            <span className="truncate text-foreground">{m.name}</span>
-            {memberRight(m)}
-          </div>
+          <MemberRow key={m.student_id} member={m} showWorkload={!stampedWorkload} />
         ))}
       </div>
 
@@ -146,6 +201,7 @@ function TeamCardZoom({ team }: { team: TeamView }) {
 export function TeamCard({ team }: { team: TeamView }) {
   const status = band(team.band);
   const needsBalancing = team.unallocated_hours > 0 || team.members.some((m) => m.overloaded);
+  const stampedWorkload = hasStampedWorkload(team);
   const summary = (
     <Card className="flex flex-col gap-5 p-6">
       <div className="flex items-start justify-between gap-4">
@@ -162,19 +218,12 @@ export function TeamCard({ team }: { team: TeamView }) {
 
       <div className="h-px bg-border/60" />
 
+      {stampedWorkload && <TeamWorkloadSummary team={team} />}
+
       <ul className="flex flex-col gap-2.5">
         {team.members.map((m) => (
-          <li key={m.student_id} className="flex items-center justify-between gap-3 text-sm">
-            <span className="truncate text-foreground">{m.name}</span>
-            {m.overloaded ? (
-              <span className="shrink-0 text-xs font-medium" style={{ color: "var(--at-risk-ink)" }}>
-                Over capacity
-              </span>
-            ) : (
-              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                {utilisationPct(m.utilisation)}
-              </span>
-            )}
+          <li key={m.student_id}>
+            <MemberRow member={m} showWorkload={!stampedWorkload} />
           </li>
         ))}
       </ul>

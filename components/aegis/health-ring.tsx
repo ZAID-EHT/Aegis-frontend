@@ -57,10 +57,12 @@ export function HealthRing({
   const circumference = 2 * Math.PI * radius;
   const target = circumference * (1 - clamped / 100);
 
-  // count-up
-  const mv = useMotionValue(reduce ? clamped : 0);
-  const [display, setDisplay] = React.useState(reduce ? clamped : 0);
+  // Initialize at the real score so first paint never flashes "0 Health".
+  const mv = useMotionValue(clamped);
+  const [display, setDisplay] = React.useState(clamped);
   React.useEffect(() => {
+    setDisplay(Math.round(clamped));
+    mv.set(clamped);
     const controls = animate(mv, clamped, {
       duration: reduce ? 0 : 0.9,
       ease: [0.22, 1, 0.36, 1],
