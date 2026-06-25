@@ -6,11 +6,13 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Sparkles, Target, Users } from "lucide-react";
+import { AlertTriangle, MessageSquare, Sparkles, Target, Users } from "lucide-react";
 
+import { ChatPanel } from "@/components/aegis/chat-panel";
 import { HealthRing } from "@/components/aegis/health-ring";
 import { OpenWorkspaceButton } from "@/components/aegis/open-workspace-button";
 import { SampleDataBanner } from "@/components/aegis/sample-data-banner";
+import { useUser } from "@/components/auth/user-provider";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -237,6 +239,10 @@ function WorkspaceSkeleton() {
   );
 }
 
+function supabaseTeamId(teamId: string): string {
+  return teamId.startsWith("T::") ? teamId.slice(3) : teamId;
+}
+
 export function StudentWorkspace({
   team,
   profile,
@@ -252,6 +258,7 @@ export function StudentWorkspace({
   loading: boolean;
   sample: boolean;
 }) {
+  const { user } = useUser();
   const firstName = name?.split(" ")[0] ?? "";
   return (
     <div className="flex flex-col gap-8">
@@ -283,7 +290,24 @@ export function StudentWorkspace({
           className="grid grid-cols-1 gap-5 lg:grid-cols-3"
         >
           <motion.div variants={rise} className="lg:col-span-2">
-            <MyTeamCard team={team} />
+            <div className="flex flex-col gap-4">
+              <MyTeamCard team={team} />
+              {user && (
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">Team chat</span>
+                  </div>
+                  <ChatPanel
+                    teamId={supabaseTeamId(team.team_id)}
+                    currentUserId={user.id}
+                    currentUserName={user.name || user.email}
+                    isReadOnly={false}
+                    messageLimit={50}
+                  />
+                </div>
+              )}
+            </div>
           </motion.div>
           <div className="flex flex-col gap-5">
             <motion.div variants={rise}>

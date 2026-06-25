@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 
 export interface SessionUser {
+  id: string;
   email: string;
   name: string;
   role: string;
@@ -28,6 +29,7 @@ interface UserContextValue {
 function metaUser(u: User): SessionUser {
   const meta = u.user_metadata ?? {};
   return {
+    id: u.id,
     email: u.email ?? "",
     name: (meta.full_name as string) || (u.email?.split("@")[0] ?? "Account"),
     role: (meta.role as string) || "Member",
