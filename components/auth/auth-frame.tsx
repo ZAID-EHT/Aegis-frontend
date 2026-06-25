@@ -35,14 +35,14 @@ export function AuthFrame({
 
       <div className="mx-auto flex min-h-screen w-full max-w-[26rem] flex-col justify-center px-5 py-12">
         <div className="mb-8 flex justify-center">
-          <Link href="/" aria-label="AEGIS home" className="inline-block">
+          <Link href="/" aria-label="AEGIS — home" className="inline-block">
             <Image
-              src="/aegis-workspace.png"
-              alt="AEGIS Workspace"
-              width={180}
-              height={180}
+              src="/aegis-logo.png"
+              alt="AEGIS — capstone allocation"
+              width={144}
+              height={144}
               priority
-              className="h-auto w-40 rounded-2xl shadow-card ring-1 ring-border/60"
+              className="h-auto w-28 object-contain sm:w-32 dark:rounded-2xl dark:bg-white dark:p-3 dark:ring-1 dark:ring-black/5"
             />
           </Link>
         </div>

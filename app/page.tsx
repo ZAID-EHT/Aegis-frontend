@@ -2,12 +2,24 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, GitBranch, Scale, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Database,
+  FolderOpen,
+  GitBranch,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 import { Logo } from "@/components/aegis/logo";
 import { ThemeToggle } from "@/components/aegis/theme-toggle";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+// Slide-only reveals (no opacity) so nothing can freeze invisible on load.
+const rise = { hidden: { y: 12 }, show: { y: 0, transition: { duration: 0.5, ease: EASE } } };
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } } };
 
 const FEATURES = [
   {
@@ -44,14 +56,19 @@ export default function LandingPage() {
         }}
       />
 
-      {/* header */}
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5">
+      {/* nav */}
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-4">
         <Logo />
-        <div className="flex items-center gap-2 sm:gap-3">
+        <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
+          <a href="#features" className="transition-colors hover:text-foreground">Features</a>
+          <a href="#integrations" className="transition-colors hover:text-foreground">Integrations</a>
+          <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
+        </nav>
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           <ThemeToggle />
           <Link
             href="/login"
-            className="rounded-xl px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Sign in
           </Link>
@@ -65,24 +82,31 @@ export default function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="mx-auto w-full max-w-3xl px-5 pb-16 pt-16 text-center sm:pt-24">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: EASE }}
-        >
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-card">
+      <section className="mx-auto w-full max-w-3xl px-5 pb-14 pt-16 text-center sm:pt-24">
+        <motion.div variants={stagger} initial="hidden" animate="show">
+          <motion.span
+            variants={rise}
+            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-card"
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--healthy)]" />
             Capstone allocation, done fairly
-          </span>
-          <h1 className="mt-6 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Fair capstone teams, backed by evidence
-          </h1>
-          <p className="mx-auto mt-5 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
+          </motion.span>
+          <motion.h1
+            variants={rise}
+            className="mt-6 text-balance text-4xl font-bold tracking-tight sm:text-[3.25rem] sm:leading-[1.05]"
+          >
+            <span className="text-foreground">Fair capstone teams,</span>
+            <br />
+            <span className="text-muted-foreground">backed by evidence</span>
+          </motion.h1>
+          <motion.p
+            variants={rise}
+            className="mx-auto mt-5 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground"
+          >
             AEGIS turns skill claims, preferences, and activity into balanced teams — and flags
-            trouble before it derails a project.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            trouble before it derails a project, with an auditable governance layer.
+          </motion.p>
+          <motion.div variants={rise} className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/signup"
               className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-lg"
@@ -96,22 +120,35 @@ export default function LandingPage() {
             >
               Sign in
             </Link>
-          </div>
+          </motion.div>
         </motion.div>
       </section>
 
+      {/* integrations — the real stack */}
+      <section id="integrations" className="mx-auto w-full max-w-3xl px-5 pb-20">
+        <p className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Runs on your stack
+        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          <span className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-card">
+            <Database className="h-4 w-4 text-primary" /> Supabase &amp; Postgres RLS
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-card">
+            <FolderOpen className="h-4 w-4 text-primary" /> Google Drive workspaces
+          </span>
+        </div>
+      </section>
+
       {/* features */}
-      <section className="mx-auto w-full max-w-5xl px-5 pb-24">
-        <div className="grid grid-cols-1 gap-x-10 gap-y-9 sm:grid-cols-2">
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, ease: EASE, delay: i * 0.05 }}
-              className="flex gap-4"
-            >
+      <section id="features" className="mx-auto w-full max-w-5xl px-5 pb-24">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 gap-x-10 gap-y-9 sm:grid-cols-2"
+        >
+          {FEATURES.map((f) => (
+            <motion.div key={f.title} variants={rise} className="flex gap-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <f.icon className="h-5 w-5" />
               </div>
@@ -121,7 +158,7 @@ export default function LandingPage() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* footer */}
