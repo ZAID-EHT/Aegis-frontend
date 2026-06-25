@@ -189,12 +189,20 @@ const AnimatedNavLink = ({ href, children }: { href: string; children: React.Rea
 
 function MiniNavbar() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
   const [headerShapeClass, setHeaderShapeClass] = React.useState("rounded-full");
   const shapeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toggleMenu = () => {
     setIsOpen((open) => !open);
   };
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   React.useEffect(() => {
     if (shapeTimeoutRef.current) {
@@ -246,9 +254,13 @@ function MiniNavbar() {
   return (
     <header
       className={cn(
-        "fixed left-1/2 top-6 z-20 flex w-[calc(100%-2rem)] -translate-x-1/2 flex-col items-center border border-[var(--login-border)] bg-[var(--login-nav-bg)] px-6 py-3 shadow-card transition-[border-radius,background-color,border-color] duration-300 ease-in-out sm:w-auto",
+        "fixed left-1/2 top-6 z-20 flex w-[calc(100%-2rem)] -translate-x-1/2 flex-col items-center border border-[var(--login-border)] px-6 py-3 shadow-card transition-[border-radius,background-color,border-color,backdrop-filter] duration-300 ease-in-out sm:w-auto",
         headerShapeClass,
       )}
+      style={{
+        backgroundColor: scrolled || isOpen ? "var(--login-nav-bg)" : "transparent",
+        backdropFilter: scrolled || isOpen ? "blur(16px)" : "none",
+      }}
     >
       <div className="flex w-full items-center justify-between gap-x-6 sm:gap-x-8">
         <Link href="/" className="flex items-center gap-2" aria-label="AEGIS home">
@@ -415,7 +427,7 @@ export function AegisSignInPage({ className }: SignInPageProps) {
       className={cn(
         "relative flex min-h-screen w-full flex-col overflow-hidden bg-background text-foreground",
         "[--login-border:rgb(15_23_42_/_0.10)] [--login-card-bg:rgb(255_255_255_/_0.92)] [--login-card-shadow:0_4px_24px_rgb(0_0_0_/_0.10)] [--login-dot:rgb(15_23_42_/_0.12)] [--login-field-bg:rgb(255_255_255_/_1)] [--login-field-border:rgb(15_23_42_/_0.12)] [--login-field-placeholder:rgb(100_116_139_/_1)] [--login-nav-bg:rgb(255_255_255_/_0.80)]",
-        "dark:[--login-border:rgb(255_255_255_/_0.10)] dark:[--login-card-bg:rgb(22_27_37_/_0.85)] dark:[--login-card-shadow:0_4px_24px_rgb(0_0_0_/_0.40),0_1px_4px_rgb(0_0_0_/_0.20)] dark:[--login-dot:rgb(255_255_255_/_0.12)] dark:[--login-field-bg:rgb(255_255_255_/_0.06)] dark:[--login-field-border:rgb(255_255_255_/_0.15)] dark:[--login-field-placeholder:rgb(255_255_255_/_0.40)] dark:[--login-nav-bg:rgb(14_17_23_/_0.72)]",
+        "dark:[--login-border:rgb(255_255_255_/_0.10)] dark:[--login-card-bg:rgb(22_27_37_/_0.85)] dark:[--login-card-shadow:0_4px_24px_rgb(0_0_0_/_0.40),0_1px_4px_rgb(0_0_0_/_0.20)] dark:[--login-dot:rgb(255_255_255_/_0.12)] dark:[--login-field-bg:rgb(255_255_255_/_0.06)] dark:[--login-field-border:rgb(255_255_255_/_0.15)] dark:[--login-field-placeholder:rgb(255_255_255_/_0.40)] dark:[--login-nav-bg:rgb(14_17_23_/_0.80)]",
         className,
       )}
     >
