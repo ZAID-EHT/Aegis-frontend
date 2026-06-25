@@ -3,32 +3,28 @@ import Link from "next/link";
 
 const SECTIONS = [
   {
-    title: "What we collect",
-    body: "AEGIS collects your email address for authentication and usage patterns needed for monitoring team health. It does not collect payment data or unnecessary personal information.",
+    title: "Acceptance",
+    body: "By using AEGIS, you accept these terms.",
   },
   {
-    title: "How we use it",
-    body: "We use this data to authenticate you, compute team health scores, and generate the audit log. AEGIS does not sell your data to third parties.",
+    title: "Permitted use",
+    body: "AEGIS is for capstone project allocation at your institution. Use it only for its intended purpose.",
   },
   {
-    title: "Google sign-in",
-    body: "If you use Google OAuth, Google sends us your name and email address. We store the email address for account access.",
+    title: "Prohibited use",
+    body: "Do not attempt to manipulate the allocation algorithm, access other users' data, or reverse-engineer the health scoring system.",
   },
   {
-    title: "Data retention",
-    body: "Session data is cleared on sign-out. Allocation results are stored in Supabase and protected with row-level security.",
+    title: "No warranty",
+    body: "This is a prototype built for a competition. It is provided as-is without warranty of any kind.",
   },
   {
-    title: "Your rights",
-    body: "You can request deletion of your account and data by contacting the administrator for your AEGIS workspace.",
-  },
-  {
-    title: "Contact",
-    body: "For privacy requests, contact admin@example.edu.",
+    title: "Intellectual property",
+    body: "The AEGIS engine, dashboard, and documentation are the work of Team The Amateurs for CIPHER 2.0.",
   },
 ];
 
-export default function PrivacyPage() {
+export default function TermsPage() {
   return (
     <main className="min-h-screen bg-background px-5 py-12 text-foreground">
       <article className="mx-auto max-w-[680px]">
@@ -37,7 +33,7 @@ export default function PrivacyPage() {
             <Image src="/aegis-workspace.png" alt="" width={32} height={32} className="h-8 w-8 rounded-full bg-foreground object-contain" />
             <span className="text-sm font-semibold text-muted-foreground">AEGIS WORKSPACE</span>
           </Link>
-          <h1 className="mt-8 text-3xl font-bold tracking-tight">Privacy Policy</h1>
+          <h1 className="mt-8 text-3xl font-bold tracking-tight">Terms of Use</h1>
           <p className="mt-2 text-sm text-muted-foreground">Last updated: June 2026</p>
         </header>
         <div className="space-y-8">
