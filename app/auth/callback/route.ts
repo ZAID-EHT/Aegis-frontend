@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 
+import { safeRedirect } from "@/lib/safe-redirect";
 import { createClient } from "@/lib/supabase/server";
 
 /** Exchanges the email-confirmation / OAuth code for a session, then redirects. */
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/dashboard";
+  const next = safeRedirect(url.searchParams.get("next"));
 
   // The dev server may bind 0.0.0.0 (LAN sharing); 0.0.0.0 is not a browsable host.
   // Prefer the browser-sent Host header and never redirect the browser to 0.0.0.0.
