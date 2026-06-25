@@ -276,7 +276,7 @@ function MiniNavbar() {
             width={20}
             height={20}
             priority
-            className="h-5 w-5 rounded-full object-contain bg-foreground"
+            className="h-5 w-5 rounded-full bg-white object-contain p-0.5 ring-1 ring-black/10"
           />
           <span className="text-sm font-semibold text-foreground">AEGIS</span>
         </Link>
@@ -454,8 +454,8 @@ export function AegisSignInPage({ className }: SignInPageProps) {
     <div
       className={cn(
         "relative flex min-h-screen w-full flex-col overflow-hidden bg-background text-foreground",
-        "[--login-border:rgb(15_23_42_/_0.10)] [--login-card-bg:rgb(255_255_255_/_0.92)] [--login-card-shadow:0_4px_24px_rgb(0_0_0_/_0.10)] [--login-dot:rgb(15_23_42_/_0.12)] [--login-field-bg:rgb(255_255_255_/_1)] [--login-field-border:rgb(15_23_42_/_0.12)] [--login-field-placeholder:rgb(100_116_139_/_1)] [--login-nav-bg:rgb(255_255_255_/_0.80)]",
-        "dark:[--login-border:rgb(255_255_255_/_0.10)] dark:[--login-card-bg:rgb(22_27_37_/_0.85)] dark:[--login-card-shadow:0_4px_24px_rgb(0_0_0_/_0.40),0_1px_4px_rgb(0_0_0_/_0.20)] dark:[--login-dot:rgb(255_255_255_/_0.12)] dark:[--login-field-bg:rgb(255_255_255_/_0.06)] dark:[--login-field-border:rgb(255_255_255_/_0.15)] dark:[--login-field-placeholder:rgb(255_255_255_/_0.40)] dark:[--login-nav-bg:rgb(14_17_23_/_0.80)]",
+        "[--login-border:rgb(15_23_42_/_0.10)] [--login-card-bg:rgb(255_255_255_/_0.92)] [--login-card-shadow:0_4px_24px_rgb(0_0_0_/_0.10)] [--login-dot:rgb(15_23_42_/_0.12)] [--login-field-bg:rgb(255_255_255_/_1)] [--login-field-border:rgb(15_23_42_/_0.12)] [--login-field-placeholder:rgb(100_116_139_/_1)] [--login-glow-a:color-mix(in_oklch,var(--primary)_32%,transparent)] [--login-glow-b:color-mix(in_oklch,var(--chart-5)_22%,transparent)] [--login-glow-c:color-mix(in_oklch,var(--info)_18%,transparent)] [--login-nav-bg:rgb(255_255_255_/_0.80)]",
+        "dark:[--login-border:rgb(255_255_255_/_0.10)] dark:[--login-card-bg:rgb(22_27_37_/_0.85)] dark:[--login-card-shadow:0_4px_24px_rgb(0_0_0_/_0.40),0_1px_4px_rgb(0_0_0_/_0.20)] dark:[--login-dot:rgb(255_255_255_/_0.12)] dark:[--login-field-bg:rgb(255_255_255_/_0.06)] dark:[--login-field-border:rgb(255_255_255_/_0.15)] dark:[--login-field-placeholder:rgb(255_255_255_/_0.40)] dark:[--login-glow-a:color-mix(in_oklch,var(--primary)_28%,transparent)] dark:[--login-glow-b:color-mix(in_oklch,var(--chart-5)_24%,transparent)] dark:[--login-glow-c:color-mix(in_oklch,var(--info)_16%,transparent)] dark:[--login-nav-bg:rgb(14_17_23_/_0.80)]",
         className,
       )}
     >
@@ -465,7 +465,7 @@ export function AegisSignInPage({ className }: SignInPageProps) {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(44rem 28rem at 50% 8%, color-mix(in oklch, var(--primary) 24%, transparent), transparent 72%), radial-gradient(36rem 26rem at 82% 18%, color-mix(in oklch, var(--chart-5) 18%, transparent), transparent 70%), radial-gradient(34rem 24rem at 14% 34%, color-mix(in oklch, var(--info) 14%, transparent), transparent 76%)",
+              "radial-gradient(44rem 28rem at 50% 8%, var(--login-glow-a), transparent 72%), radial-gradient(36rem 26rem at 82% 18%, var(--login-glow-b), transparent 70%), radial-gradient(34rem 24rem at 14% 34%, var(--login-glow-c), transparent 76%)",
           }}
         />
         {initialCanvasVisible && (
@@ -799,7 +799,7 @@ export function AegisSignInPage({ className }: SignInPageProps) {
                       alt=""
                       width={28}
                       height={28}
-                      className="h-7 w-7 rounded-full bg-foreground object-contain"
+                      className="h-7 w-7 rounded-full bg-white object-contain p-0.5 ring-1 ring-black/10"
                     />
                     <span className="text-sm font-semibold tracking-wide text-foreground">AEGIS WORKSPACE</span>
                   </Link>
