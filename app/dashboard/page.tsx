@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, Inbox, Loader2, Play, ShieldCheck, Users } from "lucide-react";
@@ -35,8 +36,16 @@ export default function DashboardPage() {
   const spotlight = data?.student_profiles.find((p) => p.skills.some((s) => s.corrected));
   const count = (b: string) => data?.teams.filter((t) => t.band === b).length ?? 0;
 
+  // A student who is not yet a cohort member and hasn't filled the skills survey is
+  // sent to onboarding first. (Demo accounts mapped to a real student_id skip this.)
+  const needsOnboarding = !loading && student && !user?.studentId && !user?.skillsCompleted;
+  useEffect(() => {
+    if (needsOnboarding) router.push("/onboarding");
+  }, [needsOnboarding, router]);
+
   // ── Student: their own team only — never the all-teams overview ──────────────
   if (!loading && student) {
+    if (needsOnboarding) return null; // redirecting to /onboarding
     const myTeam =
       data?.teams.find((t) =>
         t.members.some((m) => m.student_id === user?.studentId),

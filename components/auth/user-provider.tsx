@@ -12,6 +12,9 @@ export interface SessionUser {
   /** Cohort student id (set in user_metadata for student accounts) — used to
    *  resolve a student to their own team in the workspace view. */
   studentId: string | null;
+  /** Whether the student finished the skills-intake survey (user_metadata flag).
+   *  Presentational onboarding only — not wired into engine allocation. */
+  skillsCompleted: boolean;
 }
 
 interface UserContextValue {
@@ -29,6 +32,7 @@ function metaUser(u: User): SessionUser {
     name: (meta.full_name as string) || (u.email?.split("@")[0] ?? "Account"),
     role: (meta.role as string) || "Member",
     studentId: (meta.student_id as string) || null,
+    skillsCompleted: meta.skills_completed === true,
   };
 }
 
