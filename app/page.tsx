@@ -16,6 +16,7 @@ import {
 
 import { Logo } from "@/components/aegis/logo";
 import { ThemeToggle } from "@/components/aegis/theme-toggle";
+import { IntroSplash } from "@/components/aegis/intro-splash";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 // Slide-only reveals (no opacity) so nothing can freeze invisible on load.
@@ -46,32 +47,51 @@ const FEATURES = [
 ];
 
 /** Decorative "proof" card floated around the hero (desktop only). */
-function FloatCard({ className, children }: { className?: string; children: React.ReactNode }) {
+function FloatCard({
+  className,
+  delay = "0s",
+  children,
+}: {
+  className?: string;
+  delay?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <motion.div
-      variants={rise}
+    <div
       aria-hidden
-      className={`absolute hidden w-max select-none rounded-2xl border border-border/60 bg-card p-3.5 shadow-card-lg lg:block ${className ?? ""}`}
+      style={{ animationDelay: delay }}
+      className={`animate-float absolute hidden w-max select-none rounded-2xl border border-border/60 bg-card p-3.5 shadow-card-lg lg:block ${className ?? ""}`}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-muted/50 px-3 py-4 sm:px-5 sm:py-6">
+      <IntroSplash />
       <div className="mx-auto max-w-6xl">
         {/* framed product card on the grey page */}
         <div className="relative overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-xl">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-72"
-            style={{
-              background:
-                "radial-gradient(46rem 22rem at 50% -9rem, color-mix(in oklch, var(--primary) 14%, transparent), transparent)",
-            }}
-          />
+          {/* drifting "shader-style" aurora */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="animate-aurora absolute -left-24 -top-32 h-[34rem] w-[34rem] rounded-full opacity-60 blur-3xl"
+              style={{
+                background:
+                  "radial-gradient(closest-side, color-mix(in oklch, var(--primary) 26%, transparent), transparent)",
+              }}
+            />
+            <div
+              className="animate-aurora absolute -right-24 -top-16 h-[30rem] w-[30rem] rounded-full opacity-50 blur-3xl"
+              style={{
+                background:
+                  "radial-gradient(closest-side, color-mix(in oklch, var(--chart-5) 24%, transparent), transparent)",
+                animationDelay: "-9s",
+              }}
+            />
+          </div>
 
           {/* nav */}
           <header className="relative flex items-center justify-between gap-4 px-5 py-4 sm:px-8">
@@ -85,7 +105,7 @@ export default function LandingPage() {
               <ThemeToggle />
               <Link
                 href="/login"
-                className="rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="hidden rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               >
                 Sign in
               </Link>
@@ -106,7 +126,7 @@ export default function LandingPage() {
             className="relative px-5 pb-24 pt-14 text-center sm:px-8 sm:pb-32 sm:pt-20"
           >
             {/* — top-left: team health — */}
-            <FloatCard className="left-5 top-8 -rotate-2 xl:left-12">
+            <FloatCard className="left-5 top-8 -rotate-2 xl:left-12" delay="0s">
               <div className="flex items-center gap-3">
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold tabular-nums"
@@ -125,7 +145,7 @@ export default function LandingPage() {
             </FloatCard>
 
             {/* — top-right: duplicate flag — */}
-            <FloatCard className="right-5 top-12 rotate-2 xl:right-14">
+            <FloatCard className="right-5 top-12 rotate-2 xl:right-14" delay="-3s">
               <div className="flex items-center gap-2.5">
                 <Copy className="h-4 w-4" style={{ color: "var(--at-risk-ink)" }} />
                 <div className="text-left">
@@ -138,7 +158,7 @@ export default function LandingPage() {
             </FloatCard>
 
             {/* — bottom-left: teams formed — */}
-            <FloatCard className="bottom-12 left-6 -rotate-1 xl:left-16">
+            <FloatCard className="bottom-12 left-6 -rotate-1 xl:left-16" delay="-1.5s">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Users className="h-4 w-4" />
@@ -151,7 +171,7 @@ export default function LandingPage() {
             </FloatCard>
 
             {/* — bottom-right: integrations — */}
-            <FloatCard className="bottom-14 right-6 rotate-2 xl:right-16">
+            <FloatCard className="bottom-14 right-6 rotate-2 xl:right-16" delay="-4.5s">
               <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
                 Integrations
               </p>
