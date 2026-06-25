@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Activity, ChevronDown, Copy, Shield } from "lucide-react";
 
 import { ThemeToggle } from "@/components/aegis/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,55 @@ import { createClient } from "@/lib/supabase/client";
 interface SignInPageProps {
   className?: string;
 }
+
+const FEATURES = [
+  {
+    icon: Shield,
+    title: "Evidence-weighted allocation",
+    body: "Skill claims are scored by evidence tier. Verified work outweighs self-reported scores every time.",
+  },
+  {
+    icon: Copy,
+    title: "Duplicate detection",
+    body: "Near-identical project proposals are flagged before teams form. 0.911 cosine similarity, caught automatically.",
+  },
+  {
+    icon: Activity,
+    title: "Governed monitoring",
+    body: "Every allocation action is written to a tamper-evident audit log. Nothing happens unlogged.",
+  },
+];
+
+const FLOW_STEPS = [
+  ["Students submit", "skills and project preferences"],
+  ["Evidence is scored", "A = L x C weighting applied"],
+  ["Duplicates flagged", "cosine similarity sweep"],
+  ["Teams formed", "maximin floor-lifting"],
+  ["Health monitored", "four signals, governed alerts"],
+] as const;
+
+const FAQS = [
+  [
+    "Who can log in to AEGIS?",
+    "AEGIS has three roles: students, lecturers, and administrators. Students see their own team workspace. Lecturers monitor all teams. Administrators manage approvals and view the full governance panel.",
+  ],
+  [
+    "How are teams formed?",
+    "The engine uses a maximin algorithm that maximizes the capability floor. The weakest team is made as strong as possible rather than optimizing the average. No team is sacrificed for another.",
+  ],
+  [
+    "What is the health score?",
+    "A 0 to 100 score computed from four signals: engagement, workload balance, task completion, and milestone progress. Scores below 65 trigger a Needs Attention alert. Scores below 45 trigger a Critical alert.",
+  ],
+  [
+    "Is the data real student data?",
+    "The demonstration runs on synthetic data generated for this prototype. No real student records are used. All sample profiles use RFC 2606 reserved email addresses.",
+  ],
+  [
+    "How is the audit log tamper-evident?",
+    "Each entry includes a hash of the previous entry's content. Any change to a past entry breaks the hash chain, which the integrity check detects and flags immediately.",
+  ],
+] as const;
 
 export const CanvasRevealEffect = ({
   animationSpeed = 10,
@@ -298,6 +348,7 @@ export function AegisSignInPage({ className }: SignInPageProps) {
   const [showSuccessAnimation, setShowSuccessAnimation] = React.useState(false);
   const [initialCanvasVisible, setInitialCanvasVisible] = React.useState(true);
   const [reverseCanvasVisible, setReverseCanvasVisible] = React.useState(false);
+  const [openFaq, setOpenFaq] = React.useState<number | null>(0);
   const [error, setError] = React.useState<string | null>(
     params.get("error") === "link" ? "That sign-in link is invalid or has expired." : null,
   );
@@ -443,8 +494,8 @@ export function AegisSignInPage({ className }: SignInPageProps) {
       <div className="relative z-10 flex flex-1 flex-col">
         <MiniNavbar />
 
-        <main className="flex flex-1 flex-col lg:flex-row">
-          <div className="flex flex-1 flex-col items-center justify-center px-5 py-28">
+        <main className="flex flex-1 flex-col">
+          <section className="flex min-h-screen flex-col items-center justify-center px-5 py-28">
             <div id="signin-form" className="mt-14 w-full max-w-sm scroll-mt-28">
               <AnimatePresence mode="wait">
                 {step === "email" ? (
@@ -588,7 +639,144 @@ export function AegisSignInPage({ className }: SignInPageProps) {
                 )}
               </AnimatePresence>
             </div>
-          </div>
+          </section>
+
+          <section id="features" className="mx-auto w-full max-w-6xl scroll-mt-28 px-5 py-20">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">
+                Built for universities that take fairness seriously
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Three mechanisms that make capstone allocation something a panel of judges can scrutinize and trust.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {FEATURES.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="rounded-2xl border border-[var(--login-border)] bg-[var(--login-card-bg)] p-6 shadow-[var(--login-card-shadow)] backdrop-blur-md"
+                >
+                  <feature.icon className="h-5 w-5 text-primary" />
+                  <h3 className="mt-5 text-base font-semibold text-foreground">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section id="how-it-works" className="mx-auto w-full max-w-6xl scroll-mt-28 px-5 py-20">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">How it works</h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                From student input to governed alerts, each step leaves an auditable trail.
+              </p>
+            </div>
+            <div className="relative mt-12 grid gap-8 md:grid-cols-5 md:gap-4">
+              <div className="absolute left-[17px] top-8 h-[calc(100%-4rem)] w-px bg-border md:left-0 md:right-0 md:top-[17px] md:h-px md:w-full" />
+              {FLOW_STEPS.map(([label, description], index) => (
+                <div key={label} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
+                  <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--login-border)] bg-background text-sm font-semibold tabular-nums text-foreground shadow-card">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section id="faq" className="mx-auto w-full max-w-3xl scroll-mt-28 px-5 py-20">
+            <h2 className="text-center text-3xl font-bold tracking-tight text-foreground">Common questions</h2>
+            <div className="mt-8 divide-y divide-border overflow-hidden rounded-2xl border border-[var(--login-border)] bg-[var(--login-card-bg)] shadow-[var(--login-card-shadow)] backdrop-blur-md">
+              {FAQS.map(([question, answer], index) => {
+                const open = openFaq === index;
+                return (
+                  <div key={question}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(open ? null : index)}
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold text-foreground transition-colors hover:bg-foreground/5"
+                      aria-expanded={open}
+                    >
+                      {question}
+                      <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {open && (
+                        <motion.div
+                          key="content"
+                          initial={{ height: 0 }}
+                          animate={{ height: "auto" }}
+                          exit={{ height: 0 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          className="overflow-hidden"
+                        >
+                          <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{answer}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <footer className="mt-12 bg-[color-mix(in_oklch,var(--background)_92%,black)] px-5 py-10">
+            <div className="mx-auto max-w-6xl">
+              <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
+                <div>
+                  <Link href="/" className="inline-flex items-center gap-3">
+                    <Image
+                      src="/aegis-workspace.png"
+                      alt=""
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 rounded-full bg-foreground object-contain"
+                    />
+                    <span className="text-sm font-semibold tracking-wide text-foreground">AEGIS WORKSPACE</span>
+                  </Link>
+                  <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                    An evidence-based capstone team allocation engine.
+                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">CIPHER 2.0 - Scenario 03 - Team The Amateurs</p>
+                  <p className="mt-2 text-xs text-muted-foreground">Built with FastAPI, Next.js, and Supabase.</p>
+                </div>
+                <div className="grid gap-8 sm:grid-cols-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Product</h3>
+                    <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                      <li><a href="#features" className="hover:text-foreground">Features</a></li>
+                      <li><a href="#how-it-works" className="hover:text-foreground">How it works</a></li>
+                      <li><a href="#signin-form" className="hover:text-foreground">Sign in</a></li>
+                      <li><a href="#signin-form" className="hover:text-foreground">Get started</a></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Legal</h3>
+                    <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                      <li><Link href="/privacy" className="hover:text-foreground">Privacy policy</Link></li>
+                      <li><Link href="/terms" className="hover:text-foreground">Terms of use</Link></li>
+                      <li><Link href="/cookies" className="hover:text-foreground">Cookie policy</Link></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Support</h3>
+                    <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                      <li><a href="#faq" className="hover:text-foreground">FAQ</a></li>
+                      <li><a href="mailto:admin@example.edu" className="hover:text-foreground">Contact</a></li>
+                      <li><a href="#" className="hover:text-foreground">GitHub</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-10 flex flex-col gap-3 border-t border-border pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                <span>2026 AEGIS WORKSPACE. All rights reserved.</span>
+                <span>Made for CIPHER 2.0</span>
+              </div>
+            </div>
+          </footer>
         </main>
       </div>
     </div>
