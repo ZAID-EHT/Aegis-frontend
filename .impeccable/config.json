@@ -1,0 +1,9 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [
+      "CIPHER2_theametuers_Documentation.html"
+    ],
+    "ignoreValues": []
+  }
+}

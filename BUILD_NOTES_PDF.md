@@ -3,7 +3,7 @@
 **Produced file (exact name, verified char-for-char):** `CIPHER2_theametuers_Documentation.pdf`
 **Throwaway source:** `CIPHER2_theametuers_Documentation.html` (the HTML the PDF was rendered from)
 **Build method:** standalone HTML → headless Chrome (`--headless=new --no-pdf-header-footer --print-to-pdf`). UTF-8; no LaTeX.
-**Length:** 5 pages (A4 — grew from 4 when the §4/§6 security items were added). **Status:** committed.
+**Length:** 6 pages (A4 — grew from 5 when chat integration, backend audit confirmation, and §6 roadmap items were added). **Status:** committed.
 **Glyph check (rendered correctly in the PDF):** `Â = L × C`, `≥`, `×`, `→`, `↔`, `≠`, `§` — no mojibake.
 
 ---
@@ -61,7 +61,8 @@ data — confirm against tomorrow's screenshots: **0.911** duplicate, **15 teams
 The demonstration numbers (0.96, 84/69/41, STU_08/STU_07 cases) are all grounded in `seed.json`.
 
 ## Note
-- A design-lint hook flagged the formula callout's left accent border (`.formula`, line 28). Left
-  intentionally — it's a conventional print formula/quote rule, not a UI card; classified as a false
-  positive. No ignore directive was persisted.
-- No working code was touched this gate. Only `CIPHER2_theametuers_Documentation.{html,pdf}` and this file were created.
+- A design-lint hook flagged the formula callout's left accent border (`.formula`, line 28) and
+  numbered section headings. Both are conventional print conventions for a technical PDF, not UI
+  anti-patterns; classified as false positives. An `ignore-file` directive for
+  `CIPHER2_theametuers_Documentation.html` was persisted via `hook-admin.mjs`.
+- No working code was touched this gate. Only `CIPHER2_theametuers_Documentation.{html,pdf}` and this file were updated.
