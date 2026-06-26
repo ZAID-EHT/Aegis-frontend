@@ -221,4 +221,3 @@ export async function runPipeline(): Promise<RunResponse> {
 
   return body;
 }
-```
