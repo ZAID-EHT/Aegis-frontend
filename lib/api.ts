@@ -1,3 +1,4 @@
+```ts
 /** Typed client for the AEGIS FastAPI backend. Mirrors api/main.py response models. */
 
 import { createClient } from "@/lib/supabase/client";
@@ -105,20 +106,24 @@ export interface IntegrityView {
 /**
  * Base URL for the FastAPI backend.
  *
- * In the browser we ALWAYS target the same host the page was served from, on
- * :8000 — so it works on localhost, over the LAN, and survives Wi‑Fi/IP changes
- * with no rebuild. An explicit NEXT_PUBLIC_API_URL still wins (e.g. a remote API).
- * On the server we fall back to the env var or localhost.
+ * Production must use NEXT_PUBLIC_API_URL.
+ * Local development falls back to same host on :8000.
  */
 function resolveApiBase(): string {
-  // In the browser, ALWAYS target the same host the page came from on :8000.
-  // The API is always co-located with the web app in this project, so this is
-  // correct everywhere and immune to a stale NEXT_PUBLIC_API_URL in .env(.local).
+  const explicit = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+  // Railway / production: use backend domain from env
+  if (explicit) {
+    return explicit.replace(/\/$/, "");
+  }
+
+  // Local browser fallback only when env is missing
   if (typeof window !== "undefined") {
     return `${window.location.protocol}//${window.location.hostname}:8000`;
   }
-  // Server-side (SSR/build): env override, else localhost.
-  return process.env.NEXT_PUBLIC_API_URL?.trim() || "http://localhost:8000";
+
+  // Server-side fallback
+  return "http://localhost:8000";
 }
 
 export const API_URL = resolveApiBase();
@@ -143,10 +148,15 @@ async function getJSON<T>(path: string): Promise<T> {
   } catch {
     throw new Error(`Could not reach the AEGIS API at ${API_URL}. Is it running (uvicorn)?`);
   }
+
   if (res.status === 401 || res.status === 403) {
     throw new Error("You must be signed in as an admin to view Governance.");
   }
-  if (!res.ok) throw new Error(`${path} failed (${res.status}).`);
+
+  if (!res.ok) {
+    throw new Error(`${path} failed (${res.status}).`);
+  }
+
   return res.json() as Promise<T>;
 }
 
@@ -167,15 +177,21 @@ export async function decideApproval(id: string, action: "approve" | "reject"): 
   } catch {
     throw new Error(`Could not reach the AEGIS API at ${API_URL}.`);
   }
+
   if (res.status === 401 || res.status === 403) {
     throw new Error("You must be signed in as an admin to approve or reject accounts.");
   }
-  if (!res.ok) throw new Error(`Could not ${action} that request (${res.status}).`);
+
+  if (!res.ok) {
+    throw new Error(`Could not ${action} that request (${res.status}).`);
+  }
 }
 
 function isRunResponse(v: unknown): v is RunResponse {
   if (typeof v !== "object" || v === null) return false;
+
   const o = v as Record<string, unknown>;
+
   return (
     Array.isArray(o.stages) &&
     Array.isArray(o.teams) &&
@@ -191,14 +207,21 @@ export async function runPipeline(): Promise<RunResponse> {
   try {
     res = await fetch(`${API_URL}/run`, { method: "POST" });
   } catch {
-    throw new Error(`Could not reach the AEGIS API at ${API_URL}. Is it running (uvicorn) and is this origin allowed by CORS?`);
+    throw new Error(
+      `Could not reach the AEGIS API at ${API_URL}. Is it running (uvicorn) and is this origin allowed by CORS?`
+    );
   }
+
   if (!res.ok) {
     throw new Error(`Run failed (${res.status}). Is the AEGIS API running on ${API_URL}?`);
   }
+
   const body: unknown = await res.json();
+
   if (!isRunResponse(body)) {
     throw new Error("Unexpected response shape from /run — the API contract may have drifted.");
   }
+
   return body;
 }
+```
