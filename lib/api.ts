@@ -1,6 +1,3 @@
-```ts
-/** Typed client for the AEGIS FastAPI backend. Mirrors api/main.py response models. */
-
 import { createClient } from "@/lib/supabase/client";
 
 export interface SkillView {
